@@ -1,24 +1,27 @@
 /*
-	acrotool - program to access an SQLite database and lookup acronyms held in a table
 
-	author: simon rowe <simon@wiremoons.com>
-	license: open-source released under "New BSD License"
+	acrotool - program to access an SQLite database and lookup acronyms held in a
+	table
 
-	Program access a SQLite database and look up the requested acronym held in a table
-	called 'ACRONYMS'.
+	author:		simon rowe <simon@wiremoons.com>
+	license:	open-source released under "New BSD License"
+
+	Program access a SQLite database and look up the requested acronym held in a
+	table called 'ACRONYMS'.
 
    created: 4th Sept 2014 - version: 0.1 written - initial outline code written
-   updated: 29th Sept 2014 - version: 0.2 add database integration, command line params - basic functionality working now
-   updated: 02nd Oct 2014 - version: 0.3 add ability to enter new records
-
+   updated: 29th Sept 2014 - version: 0.2 add database integration, command line
+														 params - basic functionality working now
+	 updated: 02nd Oct 2014 - version: 0.3 add ability to enter new records
+	 updated: 11 July 2015 - version 0.4 show source list on add new record
 
 	The location of the database can be stored in an env variable:
 
 		bash:
-		export ACRODB=/home/simon/MoonStore/Development-Code/Go/src/github.com/wiremoons/acrotool/Sybil.db
+		export ACRODB=/home/simon/work/acrotool/Sybil.db
 
 		powershell:
-		$env:ACRODB += "C:\Users\Simon\MoonStore\Development-Code\Go\src\github.com\wiremoons\acrotool\Sybil.db"
+		$env:ACRODB += "C:\Users\Simon\Go\src\github.com\wiremoons\acrotool\Sybil.db"
 
 */
 
@@ -29,18 +32,19 @@ import (
 	"database/sql"
 	"flag"
 	"fmt"
-	"github.com/dustin/go-humanize"
-	_ "github.com/mattn/go-sqlite3"
+	"go-humanize"
 	"log"
 	"os"
 	"strconv"
 	"strings"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 // SET GLOBAL VARIABLES
 
 // set the version of the app here
-var appversion string = "0.3"
+var appversion = "0.4"
 
 // below are the flag variables used for command line args
 var dbName string
@@ -100,7 +104,7 @@ func main() {
 	if debugSwitch {
 		fmt.Printf("DEBUG: Opening database: '%s' ... ", dbName)
 	}
-	// declare err as db is gloal var so already exists
+	// declare err as db is global var so already exists
 	// otherwise get: "panic: runtime error: invalid memory address or nil pointer dereference"
 	var err error
 	// get global handle to database
@@ -117,6 +121,13 @@ func main() {
 	}
 	defer db.Close()
 
+	// check connection to database is ok
+	err = db.Ping()
+	if err != nil {
+		panic(err.Error())
+	}
+	fmt.Println("Database connection ok")
+
 	// get current record count for future use
 	recCount := checkCount()
 
@@ -125,7 +136,7 @@ func main() {
 		addRecord()
 	}
 
-	// ok - must want to seach for an acronym
+	// ok - must want to search for an acronym
 	fmt.Printf("\n\nSEARCH FOR ACRONYM\n¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯\n")
 	//
 	// check we have a term to search for in the acronyms database:
@@ -161,30 +172,17 @@ func main() {
 	// flush any output to the screen
 	os.Stdout.Sync()
 
-	// Acronym = 21CN
-	// Definition = 21st Century Network
-	// Description =
-	// Source = DFTS
+	// Example record:
+	//   rowid 				: hidden internal sqlite record id
+	//   Acronym 			: 21CN
+	//   Definition 	: 21st Century Network
+	//   Description 	: A new BT network
+	//   Source 			: DFTS
 
-	// create the sql query we want to use - inserting the search term requested by the user
-	//sqlFind := "select Acronym,Definition,Description,Source from ACRONYMS where Acronym like '" + searchTerm + "' ORDER BY Source;"
-	//if debugSwitch {
-	//	fmt.Printf("DEBUG: Using SQL: %s\n", sqlFind)
-	//}
-	//// prepare the sql statement
-	//stmt, err := db.Prepare(sqlFind)
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//defer stmt.Close()
-	//// run the query
-	//rows, err := stmt.Query()
-	//if err != nil {
-	//	log.Fatal(err)
-	//}
-	//defer rows.Close()
+	// Example SQL queries
+	// Last inserted records:   SELECT * FROM acronyms Order by rowid DESC LIMIT 1;
+	// Search for acronym:     "select Acronym,Definition,Description,Source from ACRONYMS where Acronym like ? ORDER BY Source;", searchTerm
 
-	// alternate method - is safer from an SQL injection attack ?
 	// run a SQL query to find any matching acronyms to that provided by the user
 	rows, err := db.Query("select Acronym,Definition,Description,Source from ACRONYMS where Acronym like ? ORDER BY Source;", searchTerm)
 	if err != nil {
@@ -347,6 +345,28 @@ func checkCount() int64 {
 }
 
 //-------------------------------------------------------------------------
+// FUNCTION:  getSources - provde the current sources in the acronym table
+//-------------------------------------------------------------------------
+
+func getSources() string {
+	if debugSwitch {
+		fmt.Print("DEBUG: Getting source list function... ")
+	}
+	// create variable to hold returned database source list
+	var sourceList []byte
+	// query the database to distinct source records - result out in variable sourceList
+	err := db.QueryRow("select distinct(source) from acronyms;").Scan(&sourceList)
+	if err != nil {
+		fmt.Printf("QueryRow: %v\n", err)
+	}
+	if debugSwitch {
+		fmt.Printf("DEBUG: source list in table returned: %s\n", string(sourceList))
+	}
+	// return the result
+	return string(sourceList)
+}
+
+//-------------------------------------------------------------------------
 // FUNCTION:  addRecord - add a new record to the acronym table
 //-------------------------------------------------------------------------
 
@@ -362,7 +382,8 @@ func addRecord() {
 	// todo: check the acronym does not already exist - check with user to continue...
 	definition := getInput("Enter the expanded version of the new acronym: ")
 	description := getInput("Enter any description for the new acronym: ")
-	// todo: show list of sources currently used
+	// show list of sources currently used
+	fmt.Printf("Source Options: %s\n", getSources())
 	source := getInput("Enter any source for the new acronym: ")
 	fmt.Printf("Continue to add new acronym:\n\tACRONYM: %s\n\tEXPANDED: %s\n\tDESCRIPTION: %s\n\tSOURCE: %s\n", acronym, definition, description, source)
 
@@ -404,8 +425,9 @@ func checkContinue() bool {
 	response = strings.ToLower(response)
 	// see if the user input contains 'y'
 	if strings.Contains(response, "y") {
+		// done here - so return
 		return true
-	} else {
-		return false
 	}
+	// if above failed - so return false
+	return false
 }
