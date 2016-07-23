@@ -4,8 +4,8 @@
 	
 	amt is program to manage acronyms held in an SQLite database
 	
-	author:	simon rowe <simon@wiremoons.com>
-	license:	open-source released under "New BSD License"
+	author:     simon rowe <simon@wiremoons.com>
+	license:	open-source released under "MIT License"
 	
 	Program to access a SQLite database and look up a requested acronym
 	that maybe held in a table called 'ACRONYMS'.
@@ -14,21 +14,6 @@
 	exisiting, and deletion of records no longer required.
 	
 	created: 20 Jan 2016 - version: 0.1 written - initial outline code written
-	
-	
-	Database used is SQLite. The location of the database can be stored
-	in an environment variable called ACRODB. To set this you can
-	specific the path as so:
-	
-	bash:
-	export ACRODB=/home/simon/work/acrotool/Sybil.db
-	
-	powershell:
-	$env:ACRODB += "C:\Users\Simon\Work\Scratch\Sybil\Sybil.db"
-	
-	cmd.exe / DOS:
-	set ACRODB=C:\Users\Simon\Work\Scratch\Sybil\Sybil.db
-	
 	The application uses the SQLite amalgamation source code files, so
 	ensure they are included in the same directory as this programs
 	source code and then compile with:
