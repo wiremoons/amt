@@ -1,6 +1,6 @@
 # Summary for `amt`
 
-A small application called 'amt' which is an abbreviation for 'Acronym
+A small application called '`amt`' which is an acronym for 'Acronym
 Management Tool' that can be used to store, look up, and change or delete
 acronyms that are held in a SQLite database.
 
