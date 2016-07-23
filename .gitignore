@@ -6,3 +6,6 @@
 *~
 # exclude any .out files such as gmon.out and a.out
 *.out
+# exclude any compiled versions of amt
+amt
+amt.exe
