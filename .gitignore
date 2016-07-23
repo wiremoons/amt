@@ -4,4 +4,5 @@
 *.swo
 # exclude temp files often created by Emacs
 *~
-
+# exclude any .out files such as gmon.out and a.out
+*.out
