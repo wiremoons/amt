@@ -35,37 +35,37 @@ By default the database used to store the acronyms will be located in the same
 directory as the programs executable.
 
 However this can be override if prefer, and the location of the database can be
-stored in an environment variable called ACRODB. You should set this to the
+stored in an environment variable called acrodb. you should set this to the
 path and preferred database file name of you acronyms database. Example of
 setting this are shown below.
 
-On Linux and similar operating systems when using BASH:
+On Linux and similar operating systems when using bash:
 
 ```
-export ACRODB=/home/simon/work/acrotool/Sybil.db
+export acrodb=/home/simon/work/acrotool/sybil.db
 ```
 
-On Windows or Linux when using Microsoft Powershell:
+on windows or linux when using microsoft powershell:
 
 ```
-$env:ACRODB += "C:\Users\Simon\Work\Scratch\Sybil\Sybil.db"
+$env:acrodb += "c:\users\simon\work\scratch\sybil\sybil.db"
 ```
 
-On Windows when using a cmd.exe console:
+on windows when using a cmd.exe console:
 
 ```
-set ACRODB=C:\Users\Simon\Work\Scratch\Sybil\Sybil.db
+set acrodb=c:\users\simon\work\scratch\sybil\sybil.db
 ```
 
-or Windows to add persistently to your environment run the following in a
+or windows to add persistently to your environment run the following in a
 cmd.exe console:
 
 ```
-setx ACRODB=C:\Users\Simon\Work\Scratch\Sybil\Sybil.db
+setx acrodb=c:\users\simon\work\scratch\sybil\sybil.db
 ```
 
-## License
+## license
 
-This program is licensed under the "MIT License" see
-http://opensource.org/licenses/MIT for more details.
+this program is licensed under the "mit license" see
+http://opensource.org/licenses/mit for more details.
 
