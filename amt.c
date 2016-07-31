@@ -1,28 +1,28 @@
 /*
 
-	Acronym Management Tool (amt)
-	
-	amt is program to manage acronyms held in an SQLite database
-	
-	author:     simon rowe <simon@wiremoons.com>
-	license:	open-source released under "MIT License"
-	
-	Program to access a SQLite database and look up a requested acronym
-	that maybe held in a table called 'ACRONYMS'.
-	
-	Also shall allow the creation of new acronym records, alterations of
-	exisiting, and deletion of records no longer required.
-	
-	created: 20 Jan 2016 - version: 0.1 written - initial outline code written
-	The application uses the SQLite amalgamation source code files, so
-	ensure they are included in the same directory as this programs
-	source code and then compile with:
-	
-	gcc -Wall amt.c sqlite3.c -o amt.exe
-	
-*/
+Acronym Management Tool (amt)
 
-#include "sqlite3.h"    // SQLite
+amt is program to manage acronyms held in an SQLite database
+
+author:     simon rowe <simon@wiremoons.com>
+license:	open-source released under "MIT License"
+
+Program to access a SQLite database and look up a requested acronym
+that maybe held in a table called 'ACRONYMS'.
+
+Also shall allow the creation of new acronym records, alterations of
+existing, and deletion of records no longer required.
+
+created: 20 Jan 2016 - version: 0.1 written - initial outline code written
+The application uses the SQLite amalgamation source code files, so
+ensure they are included in the same directory as this programs
+source code and then compile with:
+
+gcc -Wall amt.c sqlite3.c -o amt.exe
+
+ */
+
+#include "sqlite3.h"    // SQLite header
 #include <stdlib.h>     // getenv
 #include <stdio.h>      //
 #include <unistd.h>     // strdup access
@@ -30,7 +30,7 @@
 
 /*
    GLOBAL VARIABLES
-   */
+ */
 // path and acronyms database filename
 char *dbfile="";
 // handle to the database
@@ -52,7 +52,7 @@ int newrec = 0;
 
 Function: print application start banner
 
-*/
+ */
 void printstart()
 {
     printf("\n");
@@ -68,7 +68,7 @@ void printstart()
   Function called when program starts. Used to parse command line
   options provided by the user. Uses the POSIX compliant getopts()
 
-*/
+ */
 void getCLIArgs(int argc, char **argv)
 {
     opterr = 0;
@@ -146,7 +146,7 @@ void getCLIArgs(int argc, char **argv)
   Used via registration with 'atexit()' in main()
   run any final checks and db close down here
 
-*/
+ */
 void exitCleanup()
 {
     // check if a database handle was created and assigned yet
@@ -177,13 +177,13 @@ void exitCleanup()
   Show on screen a summary of the command line switches available in the
   program.
 
-*/
+ */
 void showHelp()
 {
     printf("\n"
             "Help Summary:\n"
             "The following command line switches can be used:\n\n"
-            "  -d\tDebug - include addtional debug outputs when run\n"
+            "  -d\tDebug - include additional debug outputs when run\n"
             "  -h\tHelp - Show this help information\n"
             "  -v\tVersion - display the version of the program\n"
             "  -n\tNew - add a new acronym record to the database\n"
@@ -194,7 +194,7 @@ void showHelp()
 
 Function: check for a valid database file to open
 
-*/
+ */
 void checkDB()
 {
 
@@ -210,11 +210,11 @@ void checkDB()
     if (dbfile)
     {
         printf(" - Database location: %s\n", dbfile);
-        /* check database file is valid and accessable */
+        /* check database file is valid and accessible */
         if (access(dbfile, F_OK | R_OK) == -1)
         {
             fprintf(stderr,"\n\nERROR: The database file '%s'"
-                    " is missing or is not accessable\n\n", dbfile);
+                    " is missing or is not accessible\n\n", dbfile);
             exit(EXIT_FAILURE);
         }
     } else {
@@ -222,7 +222,7 @@ void checkDB()
         exit(EXIT_FAILURE);
     }
     // if neither of the above - check current directory we are running
-    // in - or then ofer to create a new db? otherwise exit prog here
+    // in - or then offer to create a new db? otherwise exit prog here
 
 }
 
