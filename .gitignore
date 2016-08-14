@@ -9,3 +9,6 @@
 # exclude any compiled versions of amt
 amt
 amt.exe
+# ignore cscope and ctags databases
+cscope.out
+tags
