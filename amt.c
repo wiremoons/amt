@@ -1,42 +1,49 @@
 /*
-
-Acronym Management Tool (amt)
-
-amt is program to manage acronyms held in an SQLite database
-
-author:     simon rowe <simon@wiremoons.com>
-license:	open-source released under "MIT License"
-
-Program to access a SQLite database and look up a requested acronym
-that maybe held in a table called 'ACRONYMS'.
-
-Also shall allow the creation of new acronym records, alterations of
-existing, and deletion of records no longer required.
-
-created: 20 Jan 2016 - version: 0.1 written - initial outline code written
-The application uses the SQLite amalgamation source code files, so
-ensure they are included in the same directory as this programs
-source code and then compile with:
-
-gcc -Wall amt.c sqlite3.c -o amt.exe
-
- */
+**
+** Acronym Management Tool (amt)
+**
+** amt is program to manage acronyms held in an SQLite database
+**
+** author:     simon rowe <simon@wiremoons.com>
+** license:	open-source released under "MIT License"
+** 
+** Program to access a SQLite database and look up a requested acronym that maybe
+** held in a table called 'ACRONYMS'.
+** 
+** Also shall allow the creation of new acronym records, alterations of existing,
+** and deletion of records no longer required.
+** 
+** created: 20 Jan 2016 - version: 0.1 written - initial outline code written
+** 
+** 
+** The application uses the SQLite amalgamation source code files, so ensure they
+** are included in the same directory as this programs source code and then
+** compile with:
+** 
+** gcc -Wall amt.c sqlite3.c -o amt.exe
+**
+*/
 
 #include "sqlite3.h"    // SQLite header
 #include <stdlib.h>     // getenv
 #include <stdio.h>      //
 #include <unistd.h>     // strdup access
 #include <string.h>     // strlen
+#include <malloc.h>     // free for use with strdup
 
 /*
    GLOBAL VARIABLES
- */
+   */
 // path and acronyms database filename
 char *dbfile="";
 // handle to the database
 sqlite3 *db = NULL;
 // returned result codes from calling SQLite functions
 int rc=0;
+/* data returned from SQL stmt run */
+const char *data=NULL;
+/* preprepared SQL query statement */
+sqlite3_stmt *stmt=NULL;
 // set the version of the app here
 char appversion[] = "0.1";
 // control debug outputs 0 == off | 1 == on
@@ -49,11 +56,11 @@ char *findme;
 int newrec = 0;
 
 /**-------- FUNCTION: printstart
-
-Function: print application start banner
-
- */
-void printstart()
+** 
+** Function: print application start banner
+** 
+*/
+void printstart(void)
 {
     printf("\n");
     printf("\t\tAcronym Management Tool\n"
@@ -64,11 +71,11 @@ void printstart()
 }
 
 /**-------- FUNCTION: getCLIArgs
-
-  Function called when program starts. Used to parse command line
-  options provided by the user. Uses the POSIX compliant getopts()
-
- */
+**
+**  Function called when program starts. Used to parse command line
+**  options provided by the user. Uses the POSIX compliant getopts()
+**
+*/
 void getCLIArgs(int argc, char **argv)
 {
     opterr = 0;
@@ -141,13 +148,13 @@ void getCLIArgs(int argc, char **argv)
 
 
 /**-------- FUNCTION: exitCleanup
-
-  function called when program exits
-  Used via registration with 'atexit()' in main()
-  run any final checks and db close down here
-
- */
-void exitCleanup()
+**
+** function called when program exits
+** Used via registration with 'atexit()' in main()
+** run any final checks and db close down here
+**
+*/
+void exitCleanup(void)
 {
     // check if a database handle was created and assigned yet
     if (db == NULL)
@@ -168,17 +175,19 @@ void exitCleanup()
     // close down and exit
     sqlite3_shutdown();
     printf("\nCompleted SQLite database shutdown\n\nAll is well\n");
+    // free up an memory we allocated:
+    if (findme != NULL) free(findme);
     exit(EXIT_SUCCESS);
 }
 
 
 /**-------- FUNCTION: showHelp
-
-  Show on screen a summary of the command line switches available in the
-  program.
-
- */
-void showHelp()
+** 
+** Show on screen a summary of the command line switches available in the
+** program.
+** 
+*/
+void showHelp(void)
 {
     printf("\n"
             "Help Summary:\n"
@@ -190,12 +199,24 @@ void showHelp()
             "  -s ?\tSearch - find an acronym where ? == acronym to search for\n");
 }
 
+/**-------- FUNCTION:  recCount
+** 
+** Function: run SQL query to obtain current number of acronyms in the database
+** 
+*/
+void recCount(void)
+{
+    /* a comment for the sake of it */
+
+
+}
+
 /**-------- FUNCTION: checkDB
-
-Function: check for a valid database file to open
-
- */
-void checkDB()
+** 
+** Function: check for a valid database file to open
+** 
+*/
+void checkDB(void)
 {
 
     /* check if acronyms database file was supplied on the command line */
