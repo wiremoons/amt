@@ -34,38 +34,38 @@ More information on SQLite can be found here: http://www.sqlite.org/
 By default the database used to store the acronyms will be located in the same
 directory as the programs executable.
 
-However this can be override if prefer, and the location of the database can be
-stored in an environment variable called acrodb. you should set this to the
-path and preferred database file name of you acronyms database. Example of
-setting this are shown below.
+However this can be overridden if preferred, and the location of the database
+can be stored in an environment variable called *ACRODB*. You should set this
+to the path and preferred database file name of your acronyms database.
+Examples of how to set this for different operating systems are shown below.
 
-On Linux and similar operating systems when using bash:
+On Linux and similar operating systems when using bash shell:
 
 ```
 export acrodb=/home/simon/work/acrotool/sybil.db
 ```
 
-on windows or linux when using microsoft powershell:
+on Windows or Linux when using Microsoft Powershell:
 
 ```
 $env:acrodb += "c:\users\simon\work\scratch\sybil\sybil.db"
 ```
 
-on windows when using a cmd.exe console:
+on Windows when using a cmd.exe console:
 
 ```
 set acrodb=c:\users\simon\work\scratch\sybil\sybil.db
 ```
 
-or windows to add persistently to your environment run the following in a
+or Windows to add persistently to your environment run the following in a
 cmd.exe console:
 
 ```
 setx acrodb=c:\users\simon\work\scratch\sybil\sybil.db
 ```
 
-## license
+## License
 
-this program is licensed under the "mit license" see
+This program is licensed under the "MIT License" see
 http://opensource.org/licenses/mit for more details.
 
