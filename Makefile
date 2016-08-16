@@ -95,7 +95,7 @@ LIBFLAGS=
 #
 ## +++ OTHER SOURCE FLAGS: SRCINCL +++
 #
-#  Add below as needed to include other source code file with your compile:
+#  Add below as needed to include other source code files with your compiled code:
 #
 SRCINCL=sqlite3.c
 #
@@ -103,12 +103,11 @@ SRCINCL=sqlite3.c
 ## +++ SET DEFAULTS FOR WINDOWS ENVIRONMENT +++
 RM = del
 #
-# command gets 'Linux' 'Darwin' 'FreeBSD' from command line on these OS environments
-uname_S := $(shell sh -c 'uname -s 2>/dev/null || echo not')
-# command gets 'x86_64' ''  from command line on these OS environments
-#uname_M := $(shell sh -c 'uname -m 2>/dev/null || echo not')
 #
 ## +++ DETECT ENVIRONMENT +++
+#
+# command gets 'Linux' 'Darwin' 'FreeBSD' from command line on these OS environments
+uname_S := $(shell sh -c 'uname -s 2>/dev/null || echo not')
 #
 # Use make to see if we are on Linux and if 64 or 32 bits?
 ifeq ($(uname_S),Linux)
