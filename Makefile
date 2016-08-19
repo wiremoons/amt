@@ -160,7 +160,7 @@ clean:
 	$(RM) $(OUTNAME)$(EXE_END)
 
 val:
-	 $(shell sh -c 'valgrind --leak-check=full --show-leak-kinds=all $(OUTNAME)$(EXE_END)')
+	 $(shell sh -c 'valgrind --leak-check=full --show-leak-kinds=all ./$(OUTNAME)$(EXE_END)')
 
 # used by Emacs for 'flymake'
 check-syntax:
