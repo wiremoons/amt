@@ -24,17 +24,18 @@
 **
 */
 
-#include "sqlite3.h"    // SQLite header
-#include <stdlib.h>     // getenv
-#include <stdio.h>      //
-#include <unistd.h>     // strdup access
-#include <string.h>     // strlen
-#include <malloc.h>     // free for use with strdup
+#include "sqlite3.h"    /* SQLite header */
+#include <stdlib.h>     /* getenv */
+#include <stdio.h>      /* */
+#include <unistd.h>     /* strdup access */
+#include <string.h>     /* strlen */
+#include <malloc.h>     /* free for use with strdup */
+#include <locale.h>     /* number output formating with commas */
 
 /*
-   GLOBAL VARIABLES
-   */
-// path and acronyms database filename
+*   GLOBAL VARIABLES
+*/
+/* path and acronyms database filename */
 char *dbfile="";
 // handle to the database
 sqlite3 *db = NULL;
@@ -204,23 +205,21 @@ void showHelp(void)
 ** Function: run SQL query to obtain current number of acronyms in the database
 ** 
 */
-void recCount(int *totalrec)
+int recCount(void)
 {
+    int totalrec = 0;
     /* prepare a SQL statement to obtain the current record count of the table */
     rc = sqlite3_prepare_v2(db,"select count(*) from ACRONYMS",-1, &stmt, NULL);
     if ( rc != SQLITE_OK) exit(-1);
 
     while(sqlite3_step(stmt) == SQLITE_ROW)
     {
-        data = (const char*)sqlite3_column_text(stmt,0);
-        printf("%s\n", data ? data : "[NULL]");
+        totalrec = sqlite3_column_int(stmt,0);
+        if (debug) { printf("DEBUG: total records found: %s\n", totalrec ? data : "[NULL]"); }
     }
 
-    totalrec = atoi(*data);
-
     sqlite3_finalize(stmt);
-
-
+    return(totalrec);
 }
 
 /**-------- FUNCTION: checkDB
@@ -266,6 +265,9 @@ int main(int argc, char **argv)
     // register our atexit() function
     atexit(exitCleanup);
 
+    /* use locale to format numbers output */
+    setlocale(LC_NUMERIC, "");
+
     // get any command line arguments provided by the user
     // and then process using getopts() via function below
     getCLIArgs(argc,argv);
@@ -281,22 +283,21 @@ int main(int argc, char **argv)
         return EXIT_SUCCESS;
     }
 
-    // check we have a database file to open
+    /* check we have a database file to open */
     checkDB();
 
     /* Initialise and then open the database */
     sqlite3_initialize();
-    // open the database in read & write mode
+    /* open the database in read & write mode */
     rc = sqlite3_open_v2(dbfile, &db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE, NULL);
     /* check it opened OK - if not exit */
     if (rc != SQLITE_OK)
     {
         exit(EXIT_FAILURE);
     }
-
-    int totalrec=0;
-    recCount(&totalrec);
-    printf("Record count is %d\n",totalrec);
+    /* Get number of records in database and display on screen */
+    int totalrec = recCount();
+    printf(" - Record count is: %'d\n",totalrec);
 
 
     /* perform db ops here */
