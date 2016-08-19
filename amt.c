@@ -204,9 +204,21 @@ void showHelp(void)
 ** Function: run SQL query to obtain current number of acronyms in the database
 ** 
 */
-void recCount(void)
+void recCount(int *totalrec)
 {
-    /* a comment for the sake of it */
+    /* prepare a SQL statement to obtain the current record count of the table */
+    rc = sqlite3_prepare_v2(db,"select count(*) from ACRONYMS",-1, &stmt, NULL);
+    if ( rc != SQLITE_OK) exit(-1);
+
+    while(sqlite3_step(stmt) == SQLITE_ROW)
+    {
+        data = (const char*)sqlite3_column_text(stmt,0);
+        printf("%s\n", data ? data : "[NULL]");
+    }
+
+    totalrec = atoi(*data);
+
+    sqlite3_finalize(stmt);
 
 
 }
@@ -281,6 +293,11 @@ int main(int argc, char **argv)
     {
         exit(EXIT_FAILURE);
     }
+
+    int totalrec=0;
+    recCount(&totalrec);
+    printf("Record count is %d\n",totalrec);
+
 
     /* perform db ops here */
     return (EXIT_SUCCESS);
