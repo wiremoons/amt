@@ -17,7 +17,7 @@ int recCount(void)
     while(sqlite3_step(stmt) == SQLITE_ROW)
     {
         totalrec = sqlite3_column_int(stmt,0);
-        if (debug) { printf("DEBUG: total records found: %s\n", totalrec ? data : "[NULL]"); }
+        if (debug) { printf("DEBUG: total records found: %d\n",totalrec); }
     }
 
     sqlite3_finalize(stmt);
