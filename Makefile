@@ -7,7 +7,7 @@
 #	Makefile for amt.c
 #
 ## CHANGE xxxx FOR YOUR NEW SOURCE FILE NAME & OUTPUT FILE-NAME
-SRC=amt.c
+SRC=main.c
 OUTNAME=amt
 #
 #  NOTE:
@@ -97,7 +97,7 @@ LIBFLAGS=
 #
 #  Add below as needed to include other source code files with your compiled code:
 #
-SRCINCL=sqlite3.c
+SRCINCL=sqlite3.c amt.c cli-args.c
 #
 #
 ## +++ SET DEFAULTS FOR WINDOWS ENVIRONMENT +++
