@@ -60,3 +60,20 @@ void checkDB(void)
 
 }
 
+/*
+* ADDING NEW RECORD
+* ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+* Note: To abort the input of a new record - press 'Ctrl + c'
+* 
+* Enter the new acronym: KSLOC
+* Enter the expanded version of the new acronym: Thousands of Source Line Of Code
+* Enter any description for the new acronym: The count in thousand of line of source code that makes up an application, lines of code excluding blank lines and comments.
+* Enter any source for the new acronym: General ICT
+* Continue to add new acronym:
+* 	ACRONYM: KSLOC
+* 	EXPANDED: Thousands of Source Line Of Code
+* 	DESCRIPTION: The count in thousand of line of source code that makes up an application, lines of code excluding blank lines and comments.
+* 	SOURCE: General ICT
+* Continue? [y/n]: y
+* 1 records added to the database
+*/ 
