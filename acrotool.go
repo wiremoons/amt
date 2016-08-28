@@ -1,27 +1,18 @@
 /*
 
-	acrotool - program to access an SQLite database and lookup acronyms held in a
-	table
+acrotool - program to access an SQLite database and lookup acronyms
 
-	author:		simon rowe <simon@wiremoons.com>
-	license:	open-source released under "New BSD License"
+author:	 Simon Rowe <simon@wiremoons.com>
+license: open-source released under The MIT License (MIT).
 
-	Program access a SQLite database and look up the requested acronym held in a
-	table called 'ACRONYMS'.
+The program accesses a SQLite database and looks up the requested acronym held in a table called 'ACRONYMS'.
 
-   created: 4th Sept 2014 - version: 0.1 written - initial outline code written
-   updated: 29th Sept 2014 - version: 0.2 add database integration, command line
-														 params - basic functionality working now
-	 updated: 02nd Oct 2014 - version: 0.3 add ability to enter new records
-	 updated: 11 July 2015 - version 0.4 show source list on add new record
-
-	The location of the database can be stored in an env variable:
-
-		bash:
-		export ACRODB=/home/simon/work/acrotool/Sybil.db
-
-		powershell:
-		$env:ACRODB += "C:\Users\Simon\Go\src\github.com\wiremoons\acrotool\Sybil.db"
+04 Sep 2014: version 0.1.0 initial outline code written.
+29 Sep 2014: version 0.2.0 add database integration, command line
+			  params - basic functionality working now.
+02 Oct 2014: version 0.3.0 add ability to enter new records
+11 Jul 2015: version 0.4.0 show source list on add new record
+28 Aug 2016: version 0.5.0 changed to schematic versioning, reformated code and 			  tidy up, changed to MIT license.
 
 */
 
@@ -44,7 +35,7 @@ import (
 // SET GLOBAL VARIABLES
 
 // set the version of the app here
-var appversion = "0.4"
+var appversion = "0.5.0"
 
 // below are the flag variables used for command line args
 var dbName string
@@ -105,7 +96,7 @@ func main() {
 		fmt.Printf("DEBUG: Opening database: '%s' ... ", dbName)
 	}
 	// declare err as db is global var so already exists
-	// otherwise get: "panic: runtime error: invalid memory address or nil pointer dereference"
+	// otherwise get: "panic: runtime error: invalid memory address or nil pointer de-reference"
 	var err error
 	// get global handle to database
 	db, err = sql.Open("sqlite3", dbName)
@@ -173,15 +164,17 @@ func main() {
 	os.Stdout.Sync()
 
 	// Example record:
-	//   rowid 				: hidden internal sqlite record id
-	//   Acronym 			: 21CN
+	//   rowid 			: hidden internal sqlite record id
+	//   Acronym 		: 21CN
 	//   Definition 	: 21st Century Network
 	//   Description 	: A new BT network
-	//   Source 			: DFTS
+	//   Source 		: DFTS
 
 	// Example SQL queries
-	// Last inserted records:   SELECT * FROM acronyms Order by rowid DESC LIMIT 1;
-	// Search for acronym:     "select Acronym,Definition,Description,Source from ACRONYMS where Acronym like ? ORDER BY Source;", searchTerm
+	// Last inserted records:
+	//		SELECT * FROM acronyms Order by rowid DESC LIMIT 1;
+	// Search for acronym:
+	//		"select Acronym,Definition,Description,Source from ACRONYMS where Acronym like ? ORDER BY Source;", searchTerm
 
 	// run a SQL query to find any matching acronyms to that provided by the user
 	rows, err := db.Query("select Acronym,Definition,Description,Source from ACRONYMS where Acronym like ? ORDER BY Source;", searchTerm)
@@ -323,7 +316,7 @@ func checkDB() {
 }
 
 //-------------------------------------------------------------------------
-// FUNCTION:  checkCount - provde the current record count in the acronym table
+// FUNCTION:  checkCount - provide the current record count in the acronym table
 //-------------------------------------------------------------------------
 
 func checkCount() int64 {
@@ -345,7 +338,7 @@ func checkCount() int64 {
 }
 
 //-------------------------------------------------------------------------
-// FUNCTION:  getSources - provde the current sources in the acronym table
+// FUNCTION:  getSources - provide the current sources in the acronym table
 //-------------------------------------------------------------------------
 
 func getSources() string {
