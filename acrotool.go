@@ -13,6 +13,10 @@ The program accesses a SQLite database and looks up the requested acronym held i
 02 Oct 2014: version 0.3.0 add ability to enter new records
 11 Jul 2015: version 0.4.0 show source list on add new record
 28 Aug 2016: version 0.5.0 changed to schematic versioning, reformated code and 			  tidy up, changed to MIT license.
+28 Aug 2016: version 0.5.1 added ability to view and select existing acronym
+			  source entries from enabled
+28 Aug 2016: version 0.5.2 added the display of last acronym entered into the
+			  database for user reference.
 
 */
 
@@ -35,7 +39,7 @@ import (
 // SET GLOBAL VARIABLES
 
 // set the version of the app here
-var appversion = "0.5.0"
+var appversion = "0.5.2"
 
 // below are the flag variables used for command line args
 var dbName string
@@ -118,7 +122,9 @@ func main() {
 
 	// get current record count for future use
 	recCount := checkCount()
-	fmt.Printf("Current record count is: %s", humanize.Comma(recCount))
+	fmt.Printf("Current record count is: %s\n", humanize.Comma(recCount))
+	// show last acronym entered in the database for info
+	fmt.Printf("Last acronym entered was: '%s'\n", lastAcronym())
 
 	// see if the user want to add a new record via the -n command line switch
 	if addNew {
@@ -169,8 +175,8 @@ func main() {
 	//   Source 		: DFTS
 
 	// Example SQL queries
-	// Last inserted records:
-	//		SELECT * FROM acronyms Order by rowid DESC LIMIT 1;
+	// Last inserted acronym record:
+	//		SELECT Acronym FROM acronyms Order by rowid DESC LIMIT 1;
 	// Search for acronym:
 	//		"select Acronym,Definition,Description,Source from ACRONYMS where Acronym like ? ORDER BY Source;", searchTerm
 
@@ -320,7 +326,7 @@ func checkDB() {
 }
 
 // checkCount provides the current record count in the acronym table.
-// The function tales not inputs. The function returns the record count as an
+// The function takes not inputs. The function returns the record count as an
 // int64 variable. If an error occurs obtaining the record count from the
 // database it will be printed to Stdout.
 func checkCount() int64 {
@@ -339,6 +345,32 @@ func checkCount() int64 {
 	}
 	// return the result
 	return recCount
+}
+
+// lastAcronym obtains the acronym entered into the acronym table.
+// The function takes not inputs. The function returns the last acronym as a
+// string variable. If an error occurs obtaining the acronym from the
+// database it will be printed to Stdout.
+//
+// SQL statement run is:
+// 		SELECT Acronym FROM acronyms Order by rowid DESC LIMIT 1;
+func lastAcronym() string {
+	if debugSwitch {
+		fmt.Print("DEBUG: Getting last entered acronym... ")
+	}
+	// create variable to hold returned database count of records
+	var lastEntry string
+	// query the database to get last entered acronym - result out in
+	// variable 'lastEntry'
+	err := db.QueryRow("SELECT Acronym FROM acronyms Order by rowid DESC LIMIT 1;").Scan(&lastEntry)
+	if err != nil {
+		fmt.Printf("QueryRow (lastEntry): %v\n", err)
+	}
+	if debugSwitch {
+		fmt.Printf("DEBUG: last acronym entry in table returned: %s\n", lastEntry)
+	}
+	// return the result
+	return lastEntry
 }
 
 // getSources provide the current 'sources' held in the acronym table
@@ -442,11 +474,11 @@ func addRecord() {
 		// get new database record count post insert
 		newInsertCount := checkCount()
 		// inform user of difference in database record counts - should be 1
-		fmt.Printf("%d records added to the database\n", (newInsertCount - preInsertCount))
+		fmt.Printf("SUCCESS: %d record added to the database\n", (newInsertCount - preInsertCount))
 		// inform user of database record counts
 		fmt.Printf("\nDatabase record count is: %s  [was: %s]\n", humanize.Comma(newInsertCount), humanize.Comma(preInsertCount))
 	}
-
+	// leave the program as record entered ok
 	os.Exit(0)
 }
 
