@@ -16,7 +16,9 @@ The program accesses a SQLite database and looks up the requested acronym held i
 28 Aug 2016: version 0.5.1 added ability to view and select existing acronym
 			  source entries from enabled
 28 Aug 2016: version 0.5.2 added the display of last acronym entered into the
-			  database for user reference.
+			  database for user reference. Updated to mattn/go-sqlite3 latest
+			  version so now running SQLite3 3.14.0 from 3.8.5. Added new app
+			  startup message to include SQLite version.
 
 */
 
@@ -118,13 +120,15 @@ func main() {
 	if err != nil {
 		panic(err.Error())
 	}
-	fmt.Println("Database connection ok")
+	fmt.Println("Database connection status:  √")
 
+	// get the SQLite database version we are comppiled with
+	fmt.Printf("SQLite3 Database Version:  %s\n", sqlVersion())
 	// get current record count for future use
 	recCount := checkCount()
-	fmt.Printf("Current record count is: %s\n", humanize.Comma(recCount))
+	fmt.Printf("Current record count is:  %s\n", humanize.Comma(recCount))
 	// show last acronym entered in the database for info
-	fmt.Printf("Last acronym entered was: '%s'\n", lastAcronym())
+	fmt.Printf("Last acronym entered was:  '%s'\n", lastAcronym())
 
 	// see if the user want to add a new record via the -n command line switch
 	if addNew {
@@ -371,6 +375,29 @@ func lastAcronym() string {
 	}
 	// return the result
 	return lastEntry
+}
+
+// sqlVersion provides the version of SQLite that is being used by the
+// program. The function take no parameters. The function returns a string
+// with a version number obtained by running the SQLite3 statement:
+//		select SQLITE_VERSION();
+func sqlVersion() string {
+	if debugSwitch {
+		fmt.Print("DEBUG: Getting SQLite3 database version of software... ")
+	}
+	// create variable to hold returned database count of records
+	var dbVer string
+	// query the database to get version - result out in
+	// variable 'dbVer'
+	err := db.QueryRow("select SQLITE_VERSION();").Scan(&dbVer)
+	if err != nil {
+		fmt.Printf("QueryRow (dbVer): %v\n", err)
+	}
+	if debugSwitch {
+		fmt.Printf("DEBUG: last acronym entry in table returned: %s\n", dbVer)
+	}
+	// return the result
+	return dbVer
 }
 
 // getSources provide the current 'sources' held in the acronym table
