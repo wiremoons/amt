@@ -29,12 +29,12 @@ import (
 	"database/sql"
 	"flag"
 	"fmt"
-	"go-humanize"
 	"log"
 	"os"
 	"strconv"
 	"strings"
 
+	"github.com/dustin/go-humanize"
 	_ "github.com/mattn/go-sqlite3"
 )
 
