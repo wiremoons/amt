@@ -166,7 +166,7 @@ func main() {
 	}
 
 	// update user that the database is open and acronym we will search for in how many records:
-	fmt.Printf("\nDatabase status: OPEN - \tSearching for:  '%s'  across %s records - please wait ...\n", searchTerm, humanize.Comma(recCount))
+	fmt.Printf("\nSearching for:  '%s'  across %s records - please wait...\n", searchTerm, humanize.Comma(recCount))
 
 	// flush any output to the screen
 	os.Stdout.Sync()
@@ -193,21 +193,24 @@ func main() {
 
 	fmt.Printf("\nMatching results are:\n\n")
 	for rows.Next() {
-		// variables to hold returned database values - use []byte instead of string to get around NULL values issue
-		// error:  " Scan error on column index 2: unsupported driver -> Scan pair: <nil> -> *string"
+		// variables to hold returned database values - use []byte instead
+		// of string to get around NULL values issue error:
+		// 		" Scan error on column index 2: unsupported driver ->
+		//			Scan pair: <nil> -> *string"
 		var acronym, definition, description, source []byte
 		err := rows.Scan(&acronym, &definition, &description, &source)
 		if err != nil {
-			fmt.Printf("ERROR: reading returned database result: %v", err)
+			fmt.Printf("ERROR: reading database record: %v", err)
 		}
-		// print the current row to screen - need string(...) as values are bytes
-		fmt.Printf("ACRONYM: '%s' is: %s.\nDESCRIPTION: %s\nUSED BY: %s\n\n",
+		// print the current row to screen - need string(...) as values
+		// are bytes
+		fmt.Printf("ACRONYM: '%s' is: %s.\nDESCRIPTION: %s\nSOURCE: %s\n\n",
 			string(acronym), string(definition), string(description), string(source))
 	}
 	// check there were no other error while reading the database rows
 	err = rows.Err()
 	if err != nil {
-		fmt.Printf("ERROR: row reading error found: %v", err)
+		fmt.Printf("ERROR: reading database row returned: %v", err)
 	}
 
 	// END OF MAIN()
