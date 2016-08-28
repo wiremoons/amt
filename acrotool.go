@@ -338,17 +338,17 @@ func checkCount() int64 {
 	return recCount
 }
 
-//-------------------------------------------------------------------------
-// FUNCTION:  getSources - provide the current sources in the acronym table
-//-------------------------------------------------------------------------
-
+// getSources provide the current 'sources' in the acronym table
+// It takes no parameters. It returns a string contain a list
+// of distinct 'source' records such as "General ICT"
 func getSources() string {
 	if debugSwitch {
 		fmt.Print("DEBUG: Getting source list function... ")
 	}
 	// create variable to hold returned database source list
 	var sourceList []byte
-	// query the database to distinct source records - result out in variable sourceList
+	// query the database to extract distinct 'source' records - result
+	// out in variable 'sourceList'
 	err := db.QueryRow("select distinct(source) from acronyms;").Scan(&sourceList)
 	if err != nil {
 		fmt.Printf("QueryRow: %v\n", err)
@@ -360,10 +360,8 @@ func getSources() string {
 	return string(sourceList)
 }
 
-//-------------------------------------------------------------------------
-// FUNCTION:  addRecord - add a new record to the acronym table
-//-------------------------------------------------------------------------
-
+// addRecord adds a new record to the acronym table held in the SQLite database
+// It does not take any parameters. It does not return any information.
 func addRecord() {
 	if debugSwitch {
 		fmt.Printf("DEBUG: Adding new record function... \n")
