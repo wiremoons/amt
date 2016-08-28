@@ -48,10 +48,13 @@ var addNew bool
 // create a global db handle - so can be used across functions
 var db *sql.DB
 
-// init() function - always runs before main() - used here to set-up required flags variables
-// from the command line parameters provided by the user when they run the app
+// init always runs before applications main() function and is used here to
+// set-up the required 'flag' variables from the command line parameters
+// provided by the user when they run the app.
 func init() {
-	// IntVar; StringVar; BoolVar all required: variable, cmd line flag, initial value, description used by flag.Usage() on error / help
+	// flag types available are: IntVar; StringVar; BoolVar
+	// flag parameters are: variable, cmd line flag, initial value, description
+	// description is used by flag.Usage() on error or for help output
 	flag.StringVar(&dbName, "i", "", "\tUSE: '-i <database_name>' name and path to the SQLite database to use")
 	flag.StringVar(&searchTerm, "s", "", "\tUSE: '-s <acronym>' acronym that is to be searched for in the database [MANDATORY]")
 	flag.BoolVar(&wildLookUp, "w", false, "\tUSE: '-w=true' to search for any similar matches to the acronym provided")
@@ -60,16 +63,10 @@ func init() {
 	flag.BoolVar(&addNew, "n", false, "\tUSE: '-n=true' to add a new acronym record")
 }
 
-//-------------------------------------------------------------------------
-// FUNCTION:  MAIN
-//-------------------------------------------------------------------------
-
+// main is the application start up function for acrotool
 func main() {
 	// print out start up banner
 	printBanner()
-	//-------------------------------------------------------------------------
-	// sort out the command line arguments
-	//-------------------------------------------------------------------------
 	// get the command line args passed to the program
 	flag.Parse()
 	// confirm debug mode is enabled
@@ -159,7 +156,7 @@ func main() {
 	}
 
 	// update user that the database is open and acronym we will search for in how many records:
-	fmt.Printf("\nDatabase status: OPEN - \tSearching for:  '%s'  in %s records ... please wait ...\n", searchTerm, humanize.Comma(recCount))
+	fmt.Printf("\nDatabase status: OPEN - \tSearching for:  '%s'  across %s records - please wait ...\n", searchTerm, humanize.Comma(recCount))
 
 	// flush any output to the screen
 	os.Stdout.Sync()
@@ -208,19 +205,15 @@ func main() {
 
 }
 
-//**********************  APPLICATION FUNCTIONS BELOW *************************
-
-//-------------------------------------------------------------------------
-// FUNCTION:  printBanner - print out program banner to show version
-//-------------------------------------------------------------------------
-
+// printBanner is used to print out program banner which displays:
+// application name and application version
 func printBanner() {
 	fmt.Printf("\n\t\t\tAcronym Search - version: %s\n\n", appversion)
 }
 
-//----------------------------------------------------------------------------
-// FUNCTION: getInput - ask user a question and return there input
-//----------------------------------------------------------------------------
+// getInput asks user a question and return their answer.
+// The question is provided to the function as a string 'question' and
+// the users response is returned as a string 'response'.
 func getInput(question string) string {
 	if debugSwitch {
 		fmt.Println("\nDEBUG: in function 'getInput' ...")
@@ -249,10 +242,20 @@ func getInput(question string) string {
 	return response
 }
 
-//-------------------------------------------------------------------------
-// FUNCTION:  checkDB - check if a valid dbName has been provided and it exists
-//-------------------------------------------------------------------------
-
+// checkDB is used to verify if a valid database file name and path has been
+// provided by the user.
+//
+// The database file name can be provided to the program via the command line
+// or via an environment variable named: ACRODB.
+// The function checks ensure the database file name exists, obtains its size
+// on disk and checks it file permissions. If there are no errors the function // returns. These are items are output to Stdout by the function.
+//
+// If the function fails for any reason the program is ended with the following
+// exit codes:
+//
+//	-3 : no data base file provided or found
+//	-4 : file is not a database file or it cannot be accessed
+//
 func checkDB() {
 	// check if user has specified the location of the database to use - either via command line or environment variable?
 	if dbName == "" {
@@ -316,10 +319,10 @@ func checkDB() {
 	// complete
 }
 
-//-------------------------------------------------------------------------
-// FUNCTION:  checkCount - provide the current record count in the acronym table
-//-------------------------------------------------------------------------
-
+// checkCount provides the current record count in the acronym table.
+// The function tales not inputs. The function returns the record count as an
+// int64 variable. If an error occurs obtaining the record count from the
+// database it will be printed to Stdout.
 func checkCount() int64 {
 	if debugSwitch {
 		fmt.Print("DEBUG: Getting record count function... ")
@@ -338,27 +341,73 @@ func checkCount() int64 {
 	return recCount
 }
 
-// getSources provide the current 'sources' in the acronym table
+// getSources provide the current 'sources' held in the acronym table
 // It takes no parameters. It returns a string contain a list
 // of distinct 'source' records such as "General ICT"
 func getSources() string {
+
 	if debugSwitch {
 		fmt.Print("DEBUG: Getting source list function... ")
 	}
 	// create variable to hold returned database source list
-	var sourceList []byte
+	sourceList := make([]string, 0)
 	// query the database to extract distinct 'source' records - result
 	// out in variable 'sourceList'
-	err := db.QueryRow("select distinct(source) from acronyms;").Scan(&sourceList)
+	rows, err := db.Query("select distinct(source) from acronyms;")
 	if err != nil {
+		// TODO: below should be to stderr or log.Fatal(err) ??
 		fmt.Printf("QueryRow: %v\n", err)
 	}
-	if debugSwitch {
-		fmt.Printf("DEBUG: source list in table returned: %s\n", string(sourceList))
+	defer rows.Close()
+
+	var srcname string
+
+	for rows.Next() {
+		err = rows.Scan(&srcname)
+		sourceList = append(sourceList, srcname)
+		//fmt.Printf("Source: %s\n", srcname)
+	}
+
+	fmt.Printf("\nExisting %d acronym 'source' choices:\n\n", len(sourceList))
+	for idx, source := range sourceList {
+		fmt.Printf("[%d]: '%s'  ", idx, source)
+	}
+	fmt.Printf("\n\n")
+	// ask user to choose one...
+	idxChoice := getInput("Enter a source [#] for the new acronym: ")
+	idxFinal, err := strconv.Atoi(idxChoice)
+	// error - could not convert to Int so just return the string as is...
+	if err != nil {
+		return string(idxChoice)
+	}
+	// check the number entered is not greater or less than is should be..
+	if (idxFinal > (len(sourceList) - 1)) || (idxFinal < 0) {
+		// error - entered value is out of range warn user and exit
+		fmt.Printf("\n\nERROR: The source # you entered '%d' is greater than choices of '0' to '%d' offered, or less than zero\n\n", idxFinal, (len(sourceList) - 1))
+		os.Exit(-8)
 	}
 	// return the result
-	return string(sourceList)
+	return string(sourceList[idxFinal])
 }
+
+/*
+age := 27
+    rows, err := db.Query("SELECT name FROM users WHERE age=?", age)
+    if err != nil {
+            log.Fatal(err)
+    }
+    defer rows.Close()
+    for rows.Next() {
+            var name string
+            if err := rows.Scan(&name); err != nil {
+                    log.Fatal(err)
+            }
+            fmt.Printf("%s is %d\n", name, age)
+    }
+    if err := rows.Err(); err != nil {
+            log.Fatal(err)
+    }
+*/
 
 // addRecord adds a new record to the acronym table held in the SQLite database
 // It does not take any parameters. It does not return any information.
@@ -374,10 +423,10 @@ func addRecord() {
 	// todo: check the acronym does not already exist - check with user to continue...
 	definition := getInput("Enter the expanded version of the new acronym: ")
 	description := getInput("Enter any description for the new acronym: ")
-	// show list of sources currently used
-	fmt.Printf("Source Options: %s\n", getSources())
-	source := getInput("Enter any source for the new acronym: ")
-	fmt.Printf("Continue to add new acronym:\n\tACRONYM: %s\n\tEXPANDED: %s\n\tDESCRIPTION: %s\n\tSOURCE: %s\n", acronym, definition, description, source)
+	// show list of sources currently used and get one from the user
+	source := getSources()
+	// check the user is happy with what has been collected from them...
+	fmt.Printf("\nContinue to add new acronym:\n\tACRONYM: %s\n\tEXPANDED: %s\n\tDESCRIPTION: %s\n\tSOURCE: %s\n", acronym, definition, description, source)
 
 	// get current database record count
 	preInsertCount := checkCount()
@@ -392,20 +441,24 @@ func addRecord() {
 		}
 		// get new database record count post insert
 		newInsertCount := checkCount()
-		// inform user of difference in database record counts - shoulld be 1
+		// inform user of difference in database record counts - should be 1
 		fmt.Printf("%d records added to the database\n", (newInsertCount - preInsertCount))
+		// inform user of database record counts
+		fmt.Printf("\nDatabase record count is: %s  [was: %s]\n", humanize.Comma(newInsertCount), humanize.Comma(preInsertCount))
 	}
 
 	os.Exit(0)
 }
 
-//----------------------------------------------------------------------------
-// FUNCTION:  checkContinue - get user input on continue or not
+// checkContinue asks the user if they would like to continue with the
+// currently running part of the application.
+//
 // checkContinue function reads input from the users console to see if
-// requesting a 'y' or 'n' response.
-// Returns a bool depending on the users response.
-// if the response contains the letter 'y' assume true
-//----------------------------------------------------------------------------
+// they provide a a 'y' or 'n' response.
+//
+// The function returns a bool depending on the users response.
+// if the response contains the letter 'y' it returns 'true'. Any other
+// response will return 'false'.
 func checkContinue() bool {
 	// create a new reader from stdin
 	reader := bufio.NewReader(os.Stdin)
