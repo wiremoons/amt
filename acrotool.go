@@ -87,8 +87,8 @@ func main() {
 		fmt.Println("\tAdd a new acronym record:", strconv.FormatBool(addNew))
 	}
 
-	// check if a valid database file has been provided - either via the environment variable $ACRODB
-	// or on the command line when the program is run
+	// check if a valid database file has been provided - either via the
+	// environment variable $ACRODB or via the command line from the user
 	checkDB()
 
 	// open the database - or abort if fails
@@ -121,6 +121,7 @@ func main() {
 
 	// get current record count for future use
 	recCount := checkCount()
+	fmt.Printf("Current record count is: %s", humanize.Comma(recCount))
 
 	// see if the user want to add a new record via the -n command line switch
 	if addNew {
