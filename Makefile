@@ -1,11 +1,12 @@
 #
 #	Makefile for Go Language code
 #
-SRC=amt.go
+SRC=amt.go screenio.go sqlitedb.go
 OUTNAME=amt
 # Go compiler settings
 CC=go
 CFLAGS=build
+RFLAGS=run
 #
 # To build for Linux 32bit
 LIN32=GOOS=linux GOARCH=386
@@ -40,6 +41,9 @@ mac32: $(SRC)
 
 mac64: $(SRC)
 	$(MAC64) $(CC) $(CFLAGS) -o $(OUTNAME)-macx64 $(SRC)
+
+run: $(SRC)
+	$(CC) $(RFLAGS) $(SRC)
 
 clean:
 	rm $(OUTNAME).exe $(OUTNAME)-x64.exe $(OUTNAME)-x386.exe $(OUTNAME) $(OUTNAME)-x386 $(OUTNAME)-macx64 $(OUTNAME)-mac386
