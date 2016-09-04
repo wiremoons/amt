@@ -21,7 +21,7 @@ import (
 // SET GLOBAL VARIABLES
 
 // set the version of the app here
-var appversion = "0.5.2"
+var appversion = "0.5.3"
 var appname string
 
 // below are the flag variables used for command line args
