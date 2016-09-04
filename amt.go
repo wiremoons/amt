@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"strconv"
 
 	"github.com/dustin/go-humanize"
@@ -21,6 +22,7 @@ import (
 
 // set the version of the app here
 var appversion = "0.5.2"
+var appname string
 
 // below are the flag variables used for command line args
 var dbName string
@@ -29,6 +31,10 @@ var wildLookUp bool
 var debugSwitch bool
 var helpMe bool
 var addNew bool
+var showVer bool
+
+// used to hold any errors
+var err error
 
 // create a global db handle - so can be used across functions
 var db *sql.DB
@@ -40,33 +46,53 @@ func init() {
 	// flag types available are: IntVar; StringVar; BoolVar
 	// flag parameters are: variable, cmd line flag, initial value, description
 	// description is used by flag.Usage() on error or for help output
-	flag.StringVar(&dbName, "i", "", "\tUSE: '-i <database_name>' name and path to the SQLite database to use")
-	flag.StringVar(&searchTerm, "s", "", "\tUSE: '-s <acronym>' acronym that is to be searched for in the database [MANDATORY]")
-	flag.BoolVar(&wildLookUp, "w", false, "\tUSE: '-w=true' to search for any similar matches to the acronym provided")
-	flag.BoolVar(&debugSwitch, "d", false, "\tUSE: '-d=true' to include additional debug output when run")
-	flag.BoolVar(&helpMe, "h", false, "\tUSE: '-h=true' to provide more detailed help on using this program")
-	flag.BoolVar(&addNew, "n", false, "\tUSE: '-n=true' to add a new acronym record")
+	flag.StringVar(&dbName, "f", "", "\tUSE: '-f <database_name>' name and path to the SQLite database to use")
+	flag.StringVar(&searchTerm, "s", "", "\tUSE: '-s <acronym>' acronym that is to be searched for in the database")
+	flag.BoolVar(&wildLookUp, "w", false, "\tUSE: '-w' to search for any similar matches to the acronym provided")
+	flag.BoolVar(&debugSwitch, "d", false, "\tUSE: '-d' to include additional debug output when run")
+	flag.BoolVar(&helpMe, "h", false, "\tUSE: '-h' to provide help on using this program")
+	flag.BoolVar(&showVer, "v", false, "\tUSE: '-v' display the version information for the program")
+	flag.BoolVar(&addNew, "n", false, "\tUSE: '-n' to add a new acronym record")
+	// get the command line args passed to the program
+	flag.Parse()
+	// get the name of the application as called from the command line
+	appname = filepath.Base(os.Args[0])
 }
 
 // main is the application start up function for amt
 func main() {
+
+	// confirm if debug mode is enabled
+	if debugSwitch {
+		log.Println("DEBUG: Debug mode enabled")
+		log.Printf("DEBUG: Debug mode enabled")
+	}
+
 	// print out start up banner
 	printBanner()
-	// get the command line args passed to the program
-	flag.Parse()
-	// confirm debug mode is enabled
-	if debugSwitch {
-		fmt.Println("DEBUG: Debug mode enabled")
-	}
+
 	// if debug is enabled - confirm the command line parameters received
 	if debugSwitch {
-		fmt.Println("DEBUG: Command Line Arguments provided are:")
-		fmt.Println("\tDatabase name to use via command line:", dbName)
-		fmt.Println("\tAcronym to search for:", searchTerm)
-		fmt.Println("\tLook for similar matches:", strconv.FormatBool(wildLookUp))
-		fmt.Println("\tDisplay additional debug output when run:", strconv.FormatBool(debugSwitch))
-		fmt.Println("\tDisplay additional help information:", strconv.FormatBool(helpMe))
-		fmt.Println("\tAdd a new acronym record:", strconv.FormatBool(addNew))
+		log.Println("DEBUG: Command Line Arguments provided are:")
+		log.Println("\t\tDatabase name to use via command line:", dbName)
+		log.Println("\t\tAcronym to search for:", searchTerm)
+		log.Println("\t\tLook for similar matches:", strconv.FormatBool(wildLookUp))
+		log.Println("\t\tDisplay additional debug output when run:", strconv.FormatBool(debugSwitch))
+		log.Println("\t\tDisplay additional help information:", strconv.FormatBool(helpMe))
+		log.Println("\t\tAdd a new acronym record:", strconv.FormatBool(addNew))
+	}
+
+	// check if command line help was request?
+	if helpMe {
+		flag.Usage()
+		versionInfo()
+		os.Exit(0)
+	}
+
+	// check if command line application version was request?
+	if showVer {
+		versionInfo()
+		os.Exit(0)
 	}
 
 	// check if a valid database file has been provided - either via the
@@ -77,20 +103,17 @@ func main() {
 	if debugSwitch {
 		fmt.Printf("DEBUG: Opening database: '%s' ... ", dbName)
 	}
-	// declare err as db is global var so already exists
-	// otherwise get: "panic: runtime error: invalid memory address or nil pointer de-reference"
-	var err error
-	// get global handle to database
+
+	// get handle to database file
 	db, err = sql.Open("sqlite3", dbName)
 	if err != nil {
+
 		if debugSwitch {
-			fmt.Printf("DEBUG: FAILED to open %s with error: %v - will exit application\n", dbName, err)
+			log.Printf("DEBUG: FAILED to open %s with error: %v - will exit application\n", dbName, err)
+			log.Println("DEBUG: Exit program with call to 'log.Fatal()'")
 		}
-		log.Fatal(err)
-		if debugSwitch {
-			fmt.Println("DEBUG: Exit program")
-		}
-		os.Exit(-6)
+
+		log.Fatalf("FATAL ERROR: unable to get handle to SQLite database file: %s\nError is: %v\n", dbName, err)
 	}
 	defer db.Close()
 

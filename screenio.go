@@ -3,8 +3,11 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"os"
+	"runtime"
 	"strings"
+	"text/template"
 )
 
 // getInput asks user a question and return their answer.
@@ -68,5 +71,35 @@ func checkContinue() bool {
 // printBanner is used to print out program banner which displays:
 // application name and application version
 func printBanner() {
-	fmt.Printf("\n\t\t\tAcronym Search - version: %s\n\n", appversion)
+	fmt.Println("\n\t\t\tAcronym Management Tool 'amt'")
+	fmt.Println("\t\t\t¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯")
+}
+
+// versionInfo function collects details of the program being run and
+// displays it on stdout
+func versionInfo() {
+
+	// define a template for display on screen with place holders for data
+	const appInfoTmpl = `
+Running '{{.appname}}' version {{.appversion}}
+
+ - Built with Go Complier '{{.compiler}}' on Golang version '{{.version}}'
+ - Author's web site: http://www.wiremoons.com/
+ - Source code for {{.appname}}: https://github.com/wiremoons/passgen/
+
+All is well
+`
+	// build a map with keys set to match the template names used
+	// and the data fields to be used in the template as values
+	data := map[string]interface{}{
+		"appname":    appname,
+		"appversion": appversion,
+		"compiler":   runtime.Compiler,
+		"version":    runtime.Version(),
+	}
+	//
+	t := template.Must(template.New("appinf").Parse(appInfoTmpl))
+	if err := t.Execute(os.Stdout, data); err != nil {
+		log.Fatalf("FATAL ERROR: in function 'versionInfo()' when building template with err: %v", err)
+	}
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 
@@ -15,7 +16,8 @@ import (
 // The database file name can be provided to the program via the command line
 // or via an environment variable named: ACRODB.
 // The function checks ensure the database file name exists, obtains its size
-// on disk and checks it file permissions. If there are no errors the function // returns. These are items are output to Stdout by the function.
+// on disk and checks it file permissions. If there are no errors the function
+// returns. These are items are output to Stdout by the function.
 //
 // If the function fails for any reason the program is ended with the following
 // exit codes:
@@ -26,41 +28,44 @@ import (
 func checkDB() {
 	// check if user has specified the location of the database to use - either via command line or environment variable?
 	if dbName == "" {
+
 		// nothing provided via command line...
 		if debugSwitch {
-			fmt.Println("DEBUG: No database name provided via command line input - check environment instead...")
-			fmt.Println("DEBUG: Environment variable $ACRODB is:", os.Getenv("ACRODB"))
+			log.Println("DEBUG: No database name provided via command line input - check environment instead...")
+			log.Println("DEBUG: Environment variable $ACRODB is:", os.Getenv("ACRODB"))
 		}
-		// get the content of environment variable $ACRODB - if exists...
+
+		// get contents of environment variable $ACRODB as no filename given on command line
 		dbName = os.Getenv("ACRODB")
+
 		// check if a database name and path was provided via the environment variable
 		if dbName == "" {
-			// no database name provided via environment variable either - tell user and exit
+
 			if debugSwitch {
-				fmt.Println("DEBUG: No database name provided via environment variable ACRODB")
-			}
-			fmt.Println("ERROR: please provide the name of a database containing your acronyms\nrun 'amt --help' for more assistance")
-			flag.Usage()
-			if debugSwitch {
+				log.Println("DEBUG: No database name provided via environment variable ACRODB")
 				fmt.Println("DEBUG: Exit program")
 			}
-			os.Exit(-3)
+
+			// no database name provided via environment variable either inform user and exit
+			// TODO : offer to create on instead here...?
+			flag.Usage()
+			log.Fatalln("FATAL ERROR: please provide the name of a database containing your acronyms\nrun 'amt --help' for more assistance\n")
 		}
 	}
 
+	// dbName is not empty if we got here
 	if debugSwitch {
-		fmt.Printf("DEBUG: database provided is: %s", dbName)
-		fmt.Printf("DEBUG: Checking file stats for: '%s'\n", dbName)
+		log.Printf("DEBUG: database provided is: %s", dbName)
+		log.Printf("DEBUG: Checking file stats for: '%s'\n", dbName)
 	}
 
 	// check 'dbName' is valid file with os.Stats()
 	fi, err := os.Stat(dbName)
-
 	if err == nil {
 		mode := fi.Mode()
 
 		if debugSwitch {
-			fmt.Printf("DEBUG: checking is '%s' is a regular file with os.Stat() call\n", dbName)
+			log.Printf("DEBUG: checking is '%s' is a regular file with os.Stat() call\n", dbName)
 		}
 
 		// check is a regular file
@@ -69,29 +74,19 @@ func checkDB() {
 			fmt.Printf("Database: %s   permissions: %s   size: %s bytes\n\n", fi.Name(), fi.Mode(), humanize.Comma(fi.Size()))
 
 			if debugSwitch {
-				fmt.Println("DEBUG: regular file check completed ok - return to main()")
+				log.Println("DEBUG: regular file check completed ok - return to main()")
 			}
-
-			// we are done!
+			// success - we are done!
 			return
 		}
-
-		// error found with the provided database file
-		fmt.Printf("ERROR: database: '%s' is not a regular file\nrun 'amt --help' for more assistance\nABORT\n", dbName)
-		if debugSwitch {
-			fmt.Println("DEBUG: Exit program")
-		}
-		os.Exit(-4)
-
-		// os.Stat() error occurred - so update user and exit
-	} else {
-		fmt.Printf("ERROR: unable to verify database: '%s' as error returned: %v\nrun 'amt --help' for more assistance\nABORT\n", dbName, err)
-		if debugSwitch {
-			fmt.Println("DEBUG: Exit program as os.Stat() failed")
-		}
-		os.Exit(-4)
 	}
-	// complete
+
+	if debugSwitch {
+		log.Printf("DEBUG: Exit program as specified database file %s is not valid file that can be accessed", dbName)
+	}
+	// error found with the provided database file
+	log.Fatalf("FATAL ERROR: database: '%s' is not a regular file\nError returned: %v\nrun 'amt --help' for more assistance\nABORT\n", dbName, err)
+
 }
 
 // checkCount provides the current record count in the acronym table.
@@ -99,18 +94,19 @@ func checkDB() {
 // int64 variable. If an error occurs obtaining the record count from the
 // database it will be printed to Stdout.
 func checkCount() int64 {
+
 	if debugSwitch {
-		fmt.Print("DEBUG: Getting record count function... ")
+		log.Print("DEBUG: Getting record count function... ")
 	}
 	// create variable to hold returned database count of records
 	var recCount int64
 	// query the database to get number of records - result out in variable recCount
 	err := db.QueryRow("select count(*) from ACRONYMS;").Scan(&recCount)
 	if err != nil {
-		fmt.Printf("QueryRow: %v\n", err)
+		log.Printf("ERROR in function 'checkCount()' with SQL QueryRow: %v\n", err)
 	}
 	if debugSwitch {
-		fmt.Printf("DEBUG: records count in table returned: %d\n", recCount)
+		log.Printf("DEBUG: records count in table returned: %d\n", recCount)
 	}
 	// return the result
 	return recCount
@@ -124,19 +120,20 @@ func checkCount() int64 {
 // SQL statement run is:
 // 		SELECT Acronym FROM acronyms Order by rowid DESC LIMIT 1;
 func lastAcronym() string {
+
 	if debugSwitch {
-		fmt.Print("DEBUG: Getting last entered acronym... ")
+		log.Print("DEBUG: Getting last entered acronym... ")
 	}
-	// create variable to hold returned database count of records
+	// create variable to hold returned database query
 	var lastEntry string
-	// query the database to get last entered acronym - result out in
-	// variable 'lastEntry'
+	// query the database to get last entered acronym - result returned to variable 'lastEntry'
 	err := db.QueryRow("SELECT Acronym FROM acronyms Order by rowid DESC LIMIT 1;").Scan(&lastEntry)
 	if err != nil {
-		fmt.Printf("QueryRow (lastEntry): %v\n", err)
+		log.Printf("ERROR: in function 'lastAcronym()' with SQL  QueryRow (lastEntry): %v\n", err)
 	}
+
 	if debugSwitch {
-		fmt.Printf("DEBUG: last acronym entry in table returned: %s\n", lastEntry)
+		log.Printf("DEBUG: last acronym entry in table returned: %s\n", lastEntry)
 	}
 	// return the result
 	return lastEntry
@@ -147,19 +144,19 @@ func lastAcronym() string {
 // with a version number obtained by running the SQLite3 statement:
 //		select SQLITE_VERSION();
 func sqlVersion() string {
+
 	if debugSwitch {
-		fmt.Print("DEBUG: Getting SQLite3 database version of software... ")
+		log.Print("DEBUG: Getting SQLite3 database version of software... ")
 	}
-	// create variable to hold returned database count of records
+	// create variable to hold returned database query
 	var dbVer string
-	// query the database to get version - result out in
-	// variable 'dbVer'
+	// query the database to get version - result returned to variable 'dbVer'
 	err := db.QueryRow("select SQLITE_VERSION();").Scan(&dbVer)
 	if err != nil {
-		fmt.Printf("QueryRow (dbVer): %v\n", err)
+		log.Printf("ERROR: in function 'sqlVersion()' with SQL QueryRow (dbVer): %v\n", err)
 	}
 	if debugSwitch {
-		fmt.Printf("DEBUG: last acronym entry in table returned: %s\n", dbVer)
+		log.Printf("DEBUG: last acronym entry in table returned: %s\n", dbVer)
 	}
 	// return the result
 	return dbVer
@@ -171,7 +168,7 @@ func sqlVersion() string {
 func getSources() string {
 
 	if debugSwitch {
-		fmt.Print("DEBUG: Getting source list function... ")
+		log.Print("DEBUG: Getting source list function... ")
 	}
 	// create variable to hold returned database source list
 	var sourceList []string
@@ -179,8 +176,7 @@ func getSources() string {
 	// out in variable 'sourceList'
 	rows, err := db.Query("select distinct(source) from acronyms;")
 	if err != nil {
-		// TODO: below should be to stderr or log.Fatal(err) ??
-		fmt.Printf("QueryRow: %v\n", err)
+		log.Printf("ERROR: in function 'getSources()' with SQL QueryRow (sourceList): %v\n", err)
 	}
 	defer rows.Close()
 
@@ -207,8 +203,7 @@ func getSources() string {
 	// check the number entered is not greater or less than is should be..
 	if (idxFinal > (len(sourceList) - 1)) || (idxFinal < 0) {
 		// error - entered value is out of range warn user and exit
-		fmt.Printf("\n\nERROR: The source # you entered '%d' is greater than choices of '0' to '%d' offered, or less than zero\n\n", idxFinal, (len(sourceList) - 1))
-		os.Exit(-8)
+		log.Fatalf("\n\nFATAL ERROR: The source # you entered '%d' is greater than choices of '0' to '%d' offered, or less than zero\n\n", idxFinal, (len(sourceList) - 1))
 	}
 	// return the result
 	return string(sourceList[idxFinal])
@@ -236,8 +231,9 @@ age := 27
 // addRecord adds a new record to the acronym table held in the SQLite database
 // It does not take any parameters. It does not return any information.
 func addRecord() {
+
 	if debugSwitch {
-		fmt.Printf("DEBUG: Adding new record function... \n")
+		log.Printf("DEBUG: Adding new record function... \n")
 	}
 	// update screen for user
 	fmt.Printf("\n\nADDING NEW RECORD\n¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯\n")
@@ -260,8 +256,7 @@ func addRecord() {
 		// ok - add record to the database table
 		_, err := db.Exec("insert into ACRONYMS(Acronym, Definition, Description, Source) values(?,?,?,?)", acronym, definition, description, source)
 		if err != nil {
-			fmt.Printf("ERROR inserting new acronym record: %v\n", err)
-			os.Exit(-8)
+			log.Fatalf("FATAL ERROR inserting new acronym record: %v\n", err)
 		}
 		// get new database record count post insert
 		newInsertCount := checkCount()
