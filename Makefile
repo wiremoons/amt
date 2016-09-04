@@ -1,9 +1,8 @@
 #
 #	Makefile for Go Language code
 #
-# --- CHANGE THESE FOR YOU SOURCE FILE NAME & OUPUT FILENAME (ie minus .go suffix)
-SRC=acrotool.go
-OUTNAME=acrotool
+SRC=amt.go
+OUTNAME=amt
 # Go compiler settings
 CC=go
 CFLAGS=build
@@ -21,12 +20,6 @@ MAC32=GOOS=darwin GOARCH=386
 # To build Mac OS X 64 bit version:
 MAC64=GOOS=darwin GOARCH=amd64
 
-LIBFLAGS=
-#-DWIN32_LEAN_AND_MEAN -DUSE_MINGW_ANSI_STDIO=1
-#	-DWIN32_LEAN_AND_MEAN=1
-#	-DUSE_MINGW_ANSI_STDIO=1
-#	-lsqlite3 - include sqlite3 library
-#
 $(OUTNAME): $(SRC)
 	$(LIN64) $(CC) $(CFLAGS) -o $(OUTNAME) $(SRC)
 
