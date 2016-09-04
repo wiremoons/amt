@@ -85,7 +85,7 @@ Running '{{.appname}}' version {{.appversion}}
 
  - Built with Go Complier '{{.compiler}}' on Golang version '{{.version}}'
  - Author's web site: http://www.wiremoons.com/
- - Source code for {{.appname}}: https://github.com/wiremoons/passgen/
+ - Source code for {{.appname}}: https://github.com/wiremoons/amt/
 
 All is well
 `
