@@ -19,6 +19,18 @@ _cgo_export.*
 
 _testmain.go
 
+# compiled versions
+amt
 *.exe
+
+# test and profiles
 *.test
 *.prof
+
+# ignore cscope and ctags databases
+cscope.out
+tags
+
+# exclude Vim temp files
+*.swp
+*.swo
