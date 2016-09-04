@@ -1,26 +1,7 @@
-/*
-
-acrotool - program to access an SQLite database and lookup acronyms
-
-author:	 Simon Rowe <simon@wiremoons.com>
-license: open-source released under The MIT License (MIT).
-
-The program accesses a SQLite database and looks up the requested acronym held in a table called 'ACRONYMS'.
-
-04 Sep 2014: version 0.1.0 initial outline code written.
-29 Sep 2014: version 0.2.0 add database integration, command line
-			  params - basic functionality working now.
-02 Oct 2014: version 0.3.0 add ability to enter new records
-11 Jul 2015: version 0.4.0 show source list on add new record
-28 Aug 2016: version 0.5.0 changed to schematic versioning, reformated code and 			  tidy up, changed to MIT license.
-28 Aug 2016: version 0.5.1 added ability to view and select existing acronym
-			  source entries from enabled
-28 Aug 2016: version 0.5.2 added the display of last acronym entered into the
-			  database for user reference. Updated to mattn/go-sqlite3 latest
-			  version so now running SQLite3 3.14.0 from 3.8.5. Added new app
-			  startup message to include SQLite version.
-
-*/
+// amt - program to access an SQLite database and lookup acronyms
+//
+// author:	Simon Rowe <simon@wiremoons.com>
+// license: open-source released under The MIT License (MIT).
 
 package main
 
@@ -69,7 +50,7 @@ func init() {
 	flag.BoolVar(&addNew, "n", false, "\tUSE: '-n=true' to add a new acronym record")
 }
 
-// main is the application start up function for acrotool
+// main is the application start up function for amt
 func main() {
 	// print out start up banner
 	printBanner()
@@ -154,7 +135,7 @@ func main() {
 
 		// check if searchTerm is populated now...
 		if searchTerm == "" {
-			fmt.Println("\nERROR: please ensure you enter the acronym you want to find\nrun 'acrotool --help' for more assistance\nABORT")
+			fmt.Println("\nERROR: please ensure you enter the acronym you want to find\nrun 'amt --help' for more assistance\nABORT")
 			if debugSwitch {
 				fmt.Println("DEBUG: Exit program")
 			}
@@ -285,7 +266,7 @@ func checkDB() {
 			if debugSwitch {
 				fmt.Println("DEBUG: No database name provided via environment variable ACRODB")
 			}
-			fmt.Println("ERROR: please provide the name of a database containing your acronyms\nrun 'acrotool --help' for more assistance")
+			fmt.Println("ERROR: please provide the name of a database containing your acronyms\nrun 'amt --help' for more assistance")
 			flag.Usage()
 			if debugSwitch {
 				fmt.Println("DEBUG: Exit program")
@@ -315,7 +296,7 @@ func checkDB() {
 			}
 			return
 		} else {
-			fmt.Printf("ERROR: database: '%s' is not a regular file\nrun 'acrotool --help' for more assistance\nABORT\n", dbName)
+			fmt.Printf("ERROR: database: '%s' is not a regular file\nrun 'amt --help' for more assistance\nABORT\n", dbName)
 			if debugSwitch {
 				fmt.Println("DEBUG: Exit program")
 			}
@@ -323,7 +304,7 @@ func checkDB() {
 		}
 		// os.Stat() error occurred - so update user and exit
 	} else {
-		fmt.Printf("ERROR: unable to verify database: '%s' as error returned: %v\nrun 'acrotool --help' for more assistance\nABORT\n", dbName, err)
+		fmt.Printf("ERROR: unable to verify database: '%s' as error returned: %v\nrun 'amt --help' for more assistance\nABORT\n", dbName, err)
 		if debugSwitch {
 			fmt.Println("DEBUG: Exit program as os.Stat() failed")
 		}

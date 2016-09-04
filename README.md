@@ -14,6 +14,8 @@ acronyms that are held in a local SQLite database table.
 The program can search for acronyms, add or delete acronyms, and amend
 existing acronyms which are all stored in the SQLite database.
 
+The `amt` program accesses a SQLite database and looks up the requested acronym held in a table called '*ACRONYMS*'.
+
 ## Database Location
 
 By default the database used to store the acronyms will be located in the same
