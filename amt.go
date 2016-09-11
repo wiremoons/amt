@@ -80,6 +80,7 @@ func main() {
 		log.Println("\t\tDisplay additional debug output when run:", strconv.FormatBool(debugSwitch))
 		log.Println("\t\tDisplay additional help information:", strconv.FormatBool(helpMe))
 		log.Println("\t\tAdd a new acronym record:", strconv.FormatBool(addNew))
+		log.Println("\t\tShow the applications version:", strconv.FormatBool(addNew))
 	}
 
 	// check if command line help was request?
