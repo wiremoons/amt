@@ -10,43 +10,49 @@ import (
 	"github.com/dustin/go-humanize"
 )
 
-// checkDB is used to verify if a valid database file name and path has been
-// provided by the user.
+// checkDB is used to verify if a valid database file name and path
+// has been provided by the user.
 //
-// The database file name can be provided to the program via the command line
-// or via an environment variable named: ACRODB.
-// The function checks ensure the database file name exists, obtains its size
-// on disk and checks it file permissions. If there are no errors the function
-// returns. These are items are output to Stdout by the function.
+// The database file name can be provided to the program via the
+// command line or via an environment variable named: ACRODB. The
+// function checks ensure the database file name exists, obtains its
+// size on disk and checks it file permissions. These are items are
+// output to Stdout by the function. If there are no errors the
+// function returns.
 //
-// If the function fails for any reason the program is ended with the following
-// exit codes:
+// If the function fails for any reason the program is ended with the
+// following exit codes:
 //
 //	-3 : no data base file provided or found
 //	-4 : file is not a database file or it cannot be accessed
 //
 func checkDB() {
-	// check if user has specified the location of the database to use - either via command line or environment variable?
+	// check if user has specified the location of the database to
+	// use - either via command line or environment variable?
 	if dbName == "" {
-
 		// nothing provided via command line...
 		if debugSwitch {
-			log.Println("DEBUG: No database name provided via command line input - check environment instead...")
+			log.Print("DEBUG: No database name provided via ")
+			log.Println("command line input - check environment instead...")
 			log.Println("DEBUG: Environment variable $ACRODB is:", os.Getenv("ACRODB"))
 		}
 
-		// get contents of environment variable $ACRODB as no filename given on command line
+		// get contents of environment variable $ACRODB as no filename
+		// given on command line
 		dbName = os.Getenv("ACRODB")
 
-		// check if a database name and path was provided via the environment variable
+		// check if a database name and path was provided via the
+		// environment variable
 		if dbName == "" {
 
 			if debugSwitch {
 				log.Println("DEBUG: No database name provided via environment variable ACRODB")
-				fmt.Println("DEBUG: Exit program")
+				log.Println("DEBUG: Exit program")
 			}
 
-			// no database name provided via environment variable either inform user and exit
+			// no database name provided via environment variable so
+			// inform user and exit
+			//
 			// TODO : offer to create on instead here...?
 			flag.Usage()
 			log.Fatalln("FATAL ERROR: please provide the name of a database containing your acronyms\nrun 'amt --help' for more assistance\n")
@@ -71,7 +77,8 @@ func checkDB() {
 		// check is a regular file
 		if mode.IsRegular() {
 			// print out some details of the database file:
-			fmt.Printf("Database: %s   permissions: %s   size: %s bytes\n\n", fi.Name(), fi.Mode(), humanize.Comma(fi.Size()))
+			fmt.Printf("Database: %s   permissions: %s   size: %s bytes\n\n",
+				fi.Name(), fi.Mode(), humanize.Comma(fi.Size()))
 
 			if debugSwitch {
 				log.Println("DEBUG: regular file check completed ok - return to main()")
@@ -82,25 +89,27 @@ func checkDB() {
 	}
 
 	if debugSwitch {
-		log.Printf("DEBUG: Exit program as specified database file %s is not valid file that can be accessed", dbName)
+		log.Print("DEBUG: Exiting program as specified database file ")
+		log.Printf("%s is not valid file that can be accessed", dbName)
 	}
 	// error found with the provided database file
 	log.Fatalf("FATAL ERROR: database: '%s' is not a regular file\nError returned: %v\nrun 'amt --help' for more assistance\nABORT\n", dbName, err)
 
 }
 
-// checkCount provides the current record count in the acronym table.
-// The function takes not inputs. The function returns the record count as an
-// int64 variable. If an error occurs obtaining the record count from the
-// database it will be printed to Stdout.
+// checkCount provides the current total record count in the acronym
+// table. The function takes no inputs. checkCount function returns
+// the record count as an int64 variable. If an error occurs obtaining
+// the record count from the database it will be printed to stderr.
 func checkCount() int64 {
 
 	if debugSwitch {
-		log.Print("DEBUG: Getting record count function... ")
+		log.Println("DEBUG: Getting record count function... ")
 	}
 	// create variable to hold returned database count of records
 	var recCount int64
-	// query the database to get number of records - result out in variable recCount
+	// query the database to get number of records - result out in
+	// variable recCount
 	err := db.QueryRow("select count(*) from ACRONYMS;").Scan(&recCount)
 	if err != nil {
 		log.Printf("ERROR in function 'checkCount()' with SQL QueryRow: %v\n", err)
@@ -112,21 +121,24 @@ func checkCount() int64 {
 	return recCount
 }
 
-// lastAcronym obtains the acronym entered into the acronym table.
-// The function takes not inputs. The function returns the last acronym as a
-// string variable. If an error occurs obtaining the acronym from the
-// database it will be printed to Stdout.
+// lastAcronym obtains the last acronym entered into the acronym
+// table. The lastAcronym function takes not inputs. The lastAcronym
+// function returns the last acronym entered into the table as a
+// string variable. If an error occurs obtaining the last acronym
+// entered from the database it will be printed to stderr.
 //
 // SQL statement run is:
-// 		SELECT Acronym FROM acronyms Order by rowid DESC LIMIT 1;
+//
+//    SELECT Acronym FROM acronyms Order by rowid DESC LIMIT 1;
 func lastAcronym() string {
 
 	if debugSwitch {
-		log.Print("DEBUG: Getting last entered acronym... ")
+		log.Println("DEBUG: Getting last entered acronym... ")
 	}
 	// create variable to hold returned database query
 	var lastEntry string
-	// query the database to get last entered acronym - result returned to variable 'lastEntry'
+	// query the database to get last entered acronym - result
+	// returned to variable 'lastEntry'
 	err := db.QueryRow("SELECT Acronym FROM acronyms Order by rowid DESC LIMIT 1;").Scan(&lastEntry)
 	if err != nil {
 		log.Printf("ERROR: in function 'lastAcronym()' with SQL  QueryRow (lastEntry): %v\n", err)
@@ -139,18 +151,21 @@ func lastAcronym() string {
 	return lastEntry
 }
 
-// sqlVersion provides the version of SQLite that is being used by the
-// program. The function take no parameters. The function returns a string
-// with a version number obtained by running the SQLite3 statement:
-//		select SQLITE_VERSION();
+// sqlVersion provides the version of SQLite library that is being
+// used by the program. The function take no parameters. The
+// sqlVersion function returns a string with a version number obtained
+// by running the SQLite3 statement:
+//
+//     SELECT SQLITE_VERSION();
 func sqlVersion() string {
 
 	if debugSwitch {
-		log.Print("DEBUG: Getting SQLite3 database version of software... ")
+		log.Println("DEBUG: Getting SQLite3 database version of software... ")
 	}
 	// create variable to hold returned database query
 	var dbVer string
-	// query the database to get version - result returned to variable 'dbVer'
+	// query the database to get version - result returned to variable
+	// 'dbVer'
 	err := db.QueryRow("select SQLITE_VERSION();").Scan(&dbVer)
 	if err != nil {
 		log.Printf("ERROR: in function 'sqlVersion()' with SQL QueryRow (dbVer): %v\n", err)
@@ -163,8 +178,9 @@ func sqlVersion() string {
 }
 
 // getSources provide the current 'sources' held in the acronym table
-// It takes no parameters. It returns a string contain a list
-// of distinct 'source' records such as "General ICT"
+// getSources function takes no parameters. The getSources functions
+// returns a string contain a list of distinct 'source' records such
+// as "General ICT"
 func getSources() string {
 
 	if debugSwitch {
@@ -172,8 +188,8 @@ func getSources() string {
 	}
 	// create variable to hold returned database source list
 	var sourceList []string
-	// query the database to extract distinct 'source' records - result
-	// out in variable 'sourceList'
+	// query the database to extract distinct 'source' records -
+	// result out in variable 'sourceList'
 	rows, err := db.Query("select distinct(source) from acronyms;")
 	if err != nil {
 		log.Printf("ERROR: in function 'getSources()' with SQL QueryRow (sourceList): %v\n", err)
@@ -228,8 +244,16 @@ age := 27
     }
 */
 
-// addRecord adds a new record to the acronym table held in the SQLite database
-// It does not take any parameters. It does not return any information.
+// addRecord function adds a new record to the acronym table held in
+// the SQLite database It does not take any parameters. It does not
+// return any information, and exits the program on completion. The
+// applcation will exit of there is an error attempting to insert the
+// new record into the database.
+//
+// The SQL insert statement used is:
+//
+//    insert into ACRONYMS(Acronym, Definition, Description, Source)
+//    values(?,?,?,?)
 func addRecord() {
 
 	if debugSwitch {
@@ -254,16 +278,20 @@ func addRecord() {
 	// see if user wants to continue with the
 	if checkContinue() {
 		// ok - add record to the database table
-		_, err := db.Exec("insert into ACRONYMS(Acronym, Definition, Description, Source) values(?,?,?,?)", acronym, definition, description, source)
+		_, err := db.Exec("insert into ACRONYMS(Acronym, Definition, Description, Source) values(?,?,?,?)",
+			acronym, definition, description, source)
 		if err != nil {
 			log.Fatalf("FATAL ERROR inserting new acronym record: %v\n", err)
 		}
 		// get new database record count post insert
 		newInsertCount := checkCount()
-		// inform user of difference in database record counts - should be 1
-		fmt.Printf("SUCCESS: %d record added to the database\n", (newInsertCount - preInsertCount))
+		// inform user of difference in database record counts -
+		// should be 1
+		fmt.Printf("SUCCESS: %d record added to the database\n",
+			(newInsertCount - preInsertCount))
 		// inform user of database record counts
-		fmt.Printf("\nDatabase record count is: %s  [was: %s]\n", humanize.Comma(newInsertCount), humanize.Comma(preInsertCount))
+		fmt.Printf("\nDatabase record count is: %s  [was: %s]\n",
+			humanize.Comma(newInsertCount), humanize.Comma(preInsertCount))
 	}
 	// leave the program as record entered ok
 	os.Exit(0)
