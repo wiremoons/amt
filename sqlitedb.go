@@ -1,3 +1,19 @@
+// amt - program to access an SQLite database and lookup acronyms
+//
+// author:	Simon Rowe <simon@wiremoons.com>
+// license: open-source released under The MIT License (MIT).
+//
+// Package used to manipulate the SQlite database for application 'amt'
+//
+// Example record of 'ACRONYMS' table in SQLite database for
+// reference:
+//
+//   rowid 			: hidden internal sqlite record id
+//   Acronym 		: 21CN
+//   Definition 	: 21st Century Network
+//   Description 	: A new BT network
+//   Source 		: DFTS
+
 package main
 
 import (
@@ -295,4 +311,67 @@ func addRecord() {
 	}
 	// leave the program as record entered ok
 	os.Exit(0)
+}
+
+// searchRecord function obtains a string from the users and search
+// for it in the SQLite acronyms database. It does not take any
+// parameters. It does not return any information, and exits the
+// program on completion. The applcation will exit of there is an
+// error.
+//
+// The SQL insert statement used is:
+//
+//    select Acronym,Definition,Description,Source from ACRONYMS where
+//    Acronym like ? ORDER BY Source;
+func searchRecord() {
+	// start search for an acronym - update user's screen
+	fmt.Printf("\n\nSEARCH FOR ACRONYM\n¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯\n")
+	//
+	// check we have a term to search for in the acronyms database:
+	if debugSwitch {
+		fmt.Printf("DEBUG: checking for a search term ... ")
+	}
+	if debugSwitch {
+		fmt.Printf("search term provided: %s\n", searchTerm)
+	}
+
+	// update user that the database is open and acronym we will
+	// search for in how many records:
+	fmt.Printf("\nSearching for:  '%s'  across %s records - please wait...\n",
+		searchTerm, humanize.Comma(recCount))
+
+	// flush any output to the screen
+	os.Stdout.Sync()
+
+	// run a SQL query to find any matching acronyms to that provided
+	// by the user
+	rows, err := db.Query("select Acronym,Definition,Description,Source from ACRONYMS where Acronym like ? ORDER BY Source;", searchTerm)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	fmt.Printf("\nMatching results are:\n\n")
+	for rows.Next() {
+		// variables to hold returned database values - use []byte
+		// instead of string to get around NULL values issue error
+		// which states:
+		//
+		// " Scan error on column index 2: unsupported driver -> Scan
+		// pair: <nil> -> *string"
+		var acronym, definition, description, source []byte
+		err := rows.Scan(&acronym, &definition, &description, &source)
+		if err != nil {
+			fmt.Printf("ERROR: reading database record: %v", err)
+		}
+		// print the current row to screen - need string(...) as
+		// values are bytes
+		fmt.Printf("ACRONYM: '%s' is: %s.\nDESCRIPTION: %s\nSOURCE: %s\n\n",
+			string(acronym), string(definition), string(description), string(source))
+	}
+	// check there were no other error while reading the database rows
+	err = rows.Err()
+	if err != nil {
+		fmt.Printf("ERROR: reading database row returned: %v", err)
+	}
 }
