@@ -17,7 +17,8 @@
 package main
 
 import (
-	"flag"
+	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -32,19 +33,20 @@ import (
 // The database file name can be provided to the program via the
 // command line or via an environment variable named: ACRODB. The
 // function checks ensure the database file name exists, obtains its
-// size on disk and checks it file permissions. These are items are
-// output to Stdout by the function. If there are no errors the
-// function returns.
+// size on disk and checks it file permissions. These items are
+// output to stdout by the function.
 //
-// If the function fails for any reason the program is ended with the
-// following exit codes:
+// The checkDB function returns an error if it fails to find a valid
+// database file or one that can not be opened successfully. If the
+// function fails for any reason the function returns with information
+// sumarising the error encountered.
 //
-//	-3 : no data base file provided or found
-//	-4 : file is not a database file or it cannot be accessed
-//
-func checkDB() {
-	// check if user has specified the location of the database to
-	// use - either via command line or environment variable?
+// If successful the checkDB function sets the global variable
+// 'dbname' to the valid path and file name of the SQlite database to
+// be used.
+func checkDB() (err error) {
+	// check if user has specified the location of the database to use
+	// via command line - so can override environment variable setting
 	if dbName == "" {
 		// nothing provided via command line...
 		if debugSwitch {
@@ -67,11 +69,11 @@ func checkDB() {
 			}
 
 			// no database name provided via environment variable so
-			// inform user and exit
+			// inform user with an error
 			//
 			// TODO : offer to create on instead here...?
-			flag.Usage()
-			log.Fatalln("FATAL ERROR: please provide the name of a database containing your acronyms\nrun 'amt --help' for more assistance\n")
+			err = errors.New("FATAL ERROR: please provide the name of a database containing your acronyms\nrun 'amt --help' for more assistance\n")
+			return err
 		}
 	}
 
@@ -100,7 +102,7 @@ func checkDB() {
 				log.Println("DEBUG: regular file check completed ok - return to main()")
 			}
 			// success - we are done!
-			return
+			return nil
 		}
 	}
 
@@ -109,8 +111,56 @@ func checkDB() {
 		log.Printf("%s is not valid file that can be accessed", dbName)
 	}
 	// error found with the provided database file
-	log.Fatalf("FATAL ERROR: database: '%s' is not a regular file\nError returned: %v\nrun 'amt --help' for more assistance\nABORT\n", dbName, err)
+	err = fmt.Errorf("ERROR: database: '%s' is not a regular file\nError returned: %v\nrun 'amt --help' for more assistance\nABORT\n", dbName, err)
+	return err
+}
 
+// openDB is the function used to open the database and obtain initial
+// information confirming the connection is working, the acronym
+// record count in the database, and the last new acronym record
+// entered.
+//
+// The openDB function returns an error and error message to explain
+// the problem encountered, or 'nil' if no errors occured. The
+// function returns no oter information as the handle to the database
+// is a global variable.
+//
+func openDB() (err error) {
+
+	if debugSwitch {
+		fmt.Printf("DEBUG: Attempting to open the database: '%s' ... ", dbName)
+	}
+
+	// open the database - or abort if fails. If successful get the
+	// handle to open database file as 'db' for any future SQL calls
+	db, err = sql.Open("sqlite3", dbName)
+	if err != nil {
+
+		if debugSwitch {
+			log.Printf("DEBUG: FAILED to open %s with error: %v - will exit application\n", dbName, err)
+			log.Println("DEBUG: Exit program with call to 'log.Fatal()'")
+		}
+
+		err = fmt.Errorf("FATAL ERROR: unable to get handle to SQLite database file: %s\nError is: %v\n", dbName, err)
+		return err
+	}
+
+	// check connection to database is ok
+	err = db.Ping()
+	if err != nil {
+		panic(err.Error())
+	}
+	fmt.Println("Database connection status:  √")
+
+	// display the SQLite database version we are comppiled with
+	fmt.Printf("SQLite3 Database Version:  %s\n", sqlVersion())
+	// obtain and display the current record count into global var for future use
+	recCount = checkCount()
+	fmt.Printf("Current record count is:  %s\n", humanize.Comma(recCount))
+	// display last acronym entered in the database for info
+	fmt.Printf("Last acronym entered was:  '%s'\n", lastAcronym())
+	// all ok - return no errors
+	return nil
 }
 
 // checkCount provides the current total record count in the acronym
@@ -286,7 +336,8 @@ func addRecord() {
 	// show list of sources currently used and get one from the user
 	source := getSources()
 	// check the user is happy with what has been collected from them...
-	fmt.Printf("\nContinue to add new acronym:\n\tACRONYM: %s\n\tEXPANDED: %s\n\tDESCRIPTION: %s\n\tSOURCE: %s\n", acronym, definition, description, source)
+	fmt.Printf("\nContinue to add new acronym:\n\tACRONYM: %s\n\tEXPANDED: %s\n\tDESCRIPTION: %s\n\tSOURCE: %s\n",
+		acronym, definition, description, source)
 
 	// get current database record count
 	preInsertCount := checkCount()

@@ -14,7 +14,6 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/dustin/go-humanize"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -89,73 +88,68 @@ func main() {
 	// override Go standard flag.Usage function to get better
 	// formating and output by using my own function instead
 	flag.Usage = func() {
+		if debugSwitch {
+			log.Println("DEBUG: Running flag.Usage override function")
+		}
 		myUsage()
 	}
 
 	// print out start up banner
+	if debugSwitch {
+		log.Println("DEBUG: Calling 'printBanner()'")
+	}
 	printBanner()
 
+	// check if a valid database file is available on the system
+	if debugSwitch {
+		log.Println("DEBUG: Calling 'checkDB()'")
+	}
+	err = checkDB()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// open the database and retrive initial and print to screen
+	if debugSwitch {
+		log.Println("DEBUG: Calling 'openDB()'")
+	}
+	err = openDB()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	if debugSwitch {
+		log.Println("DEBUG: Start 'switch'...")
+	}
+
 	switch {
+	// display help information for the program
 	case helpMe:
 		flag.Usage()
 		versionInfo()
 		break
+	// display version information for the program
 	case showVer:
 		versionInfo()
 		break
-
-	}
-
-	// check if a valid database file has been provided - either via the
-	// environment variable $ACRODB or via the command line from the user
-	checkDB()
-
-	// open the database - or abort if fails
-	if debugSwitch {
-		fmt.Printf("DEBUG: Opening database: '%s' ... ", dbName)
-	}
-
-	// get handle to database file
-	db, err = sql.Open("sqlite3", dbName)
-	if err != nil {
-
-		if debugSwitch {
-			log.Printf("DEBUG: FAILED to open %s with error: %v - will exit application\n", dbName, err)
-			log.Println("DEBUG: Exit program with call to 'log.Fatal()'")
-		}
-
-		log.Fatalf("FATAL ERROR: unable to get handle to SQLite database file: %s\nError is: %v\n", dbName, err)
-	}
-	defer db.Close()
-
-	// check connection to database is ok
-	err = db.Ping()
-	if err != nil {
-		panic(err.Error())
-	}
-	fmt.Println("Database connection status:  √")
-
-	// get the SQLite database version we are comppiled with
-	fmt.Printf("SQLite3 Database Version:  %s\n", sqlVersion())
-	// get current record count into global var for future use
-	recCount = checkCount()
-	fmt.Printf("Current record count is:  %s\n", humanize.Comma(recCount))
-	// show last acronym entered in the database for info
-	fmt.Printf("Last acronym entered was:  '%s'\n", lastAcronym())
-
 	// see if the user want to add a new record via the -n command line switch
-	if addNew {
+	case addNew:
 		addRecord()
-	}
-
+		break
 	// see if the user wants to search for a acronym record in the database
-	if len(searchTerm) > 0 {
+	case len(searchTerm) > 0:
 		searchRecord()
-	}
-
+		break
 	// No specific application cli options given - show command line
 	// usage to help user in case they are stuck
-	versionInfo()
-	flag.Usage()
+	default:
+		if debugSwitch {
+			log.Println("DEBUG: Default switch statement called")
+		}
+		versionInfo()
+		flag.Usage()
+	}
 
+	// PROGRAM END
 }
