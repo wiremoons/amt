@@ -103,3 +103,25 @@ All is well
 		log.Fatalf("FATAL ERROR: in function 'versionInfo()' when building template with err: %v", err)
 	}
 }
+
+// myUsage replaces the standard flag.Usage() function from Go. The
+// function takes no paramaters, but outputs the command line flags
+// that can be used when running the program.
+func myUsage() {
+
+	usageText := `
+Usage of ./amt:
+
+        Flag             Description                                        Default Value
+        ¯¯¯¯             ¯¯¯¯¯¯¯¯¯¯¯                                        ¯¯¯¯¯¯¯¯¯¯¯¯¯
+        -d               show debug output                                  false
+        -f <filename>    provide filename and path to SQLite database       optional
+        -h               display help for this program                      false
+        -n               add a new acronym record                           optional
+        -s <acronym>     provide acronym to search for                      optional
+        -v               display program version                            false
+        -w               search for any similar matches                     false
+`
+	fmt.Println(usageText)
+
+}
