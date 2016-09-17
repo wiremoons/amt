@@ -334,7 +334,6 @@ func searchRecord() {
 	if debugSwitch {
 		fmt.Printf("search term provided: %s\n", searchTerm)
 	}
-
 	// update user that the database is open and acronym we will
 	// search for in how many records:
 	fmt.Printf("\nSearching for:  '%s'  across %s records - please wait...\n",
@@ -374,4 +373,6 @@ func searchRecord() {
 	if err != nil {
 		fmt.Printf("ERROR: reading database row returned: %v", err)
 	}
+	// leave the program as record searched ok
+	os.Exit(0)
 }

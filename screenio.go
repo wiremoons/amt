@@ -87,7 +87,6 @@ Running '{{.appname}}' version {{.appversion}}
  - Author's web site: http://www.wiremoons.com/
  - Source code for {{.appname}}: https://github.com/wiremoons/amt/
 
-All is well
 `
 	// build a map with keys set to match the template names used
 	// and the data fields to be used in the template as values
