@@ -21,7 +21,7 @@ import (
 // SET GLOBAL VARIABLES
 
 // set the version of the app here
-var appversion = "0.5.3"
+var appversion = "0.5.4"
 var appname string
 
 // below are the flag variables used for command line args
@@ -32,6 +32,9 @@ var debugSwitch bool
 var helpMe bool
 var addNew bool
 var showVer bool
+
+// used to keep track of database record count
+var recCount int64
 
 // used to hold any errors
 var err error
@@ -46,13 +49,13 @@ func init() {
 	// flag types available are: IntVar; StringVar; BoolVar
 	// flag parameters are: variable, cmd line flag, initial value, description
 	// description is used by flag.Usage() on error or for help output
-	flag.StringVar(&dbName, "f", "", "\tUSE: '-f <database_name>' name and path to the SQLite database to use")
-	flag.StringVar(&searchTerm, "s", "", "\tUSE: '-s <acronym>' acronym that is to be searched for in the database")
-	flag.BoolVar(&wildLookUp, "w", false, "\tUSE: '-w' to search for any similar matches to the acronym provided")
-	flag.BoolVar(&debugSwitch, "d", false, "\tUSE: '-d' to include additional debug output when run")
-	flag.BoolVar(&helpMe, "h", false, "\tUSE: '-h' to provide help on using this program")
-	flag.BoolVar(&showVer, "v", false, "\tUSE: '-v' display the version information for the program")
-	flag.BoolVar(&addNew, "n", false, "\tUSE: '-n' to add a new acronym record")
+	flag.StringVar(&dbName, "f", "", "\tprovide SQLite database `filename` and path")
+	flag.StringVar(&searchTerm, "s", "", "\t`acronym` to search for")
+	flag.BoolVar(&wildLookUp, "w", false, "\tsearch for any similar matches")
+	flag.BoolVar(&debugSwitch, "d", false, "\tshow debug output")
+	flag.BoolVar(&helpMe, "h", false, "\tdisplay help for this program")
+	flag.BoolVar(&showVer, "v", false, "\tdisplay program version")
+	flag.BoolVar(&addNew, "n", false, "\tadd a new acronym record")
 	// get the command line args passed to the program
 	flag.Parse()
 	// get the name of the application as called from the command line
@@ -81,6 +84,12 @@ func main() {
 		log.Println("\t\tDisplay additional help information:", strconv.FormatBool(helpMe))
 		log.Println("\t\tAdd a new acronym record:", strconv.FormatBool(addNew))
 		log.Println("\t\tShow the applications version:", strconv.FormatBool(addNew))
+	}
+
+	// override Go standard flag.Usage function to get better
+	// formating and output by using my own function instead
+	flag.Usage = func() {
+		myUsage()
 	}
 
 	// check if command line help was request?
@@ -138,83 +147,15 @@ func main() {
 		addRecord()
 	}
 
-	// ok - must want to search for an acronym
-	fmt.Printf("\n\nSEARCH FOR ACRONYM\n¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯\n")
-	//
-	// check we have a term to search for in the acronyms database:
-	if debugSwitch {
-		fmt.Printf("DEBUG: checking for a search term ... ")
-	}
-	//
-	// check if there a value in searchTerm provided via the command line...?
-	if searchTerm == "" {
-		if debugSwitch {
-			fmt.Println("\nDEBUG: no search term found - asking the user for one")
-		}
-
-		// no search term found on command line - prompt the user for one:
-		searchTerm = getInput("Enter an acronym to find: ")
-
-		// check if searchTerm is populated now...
-		if searchTerm == "" {
-			fmt.Println("\nERROR: please ensure you enter the acronym you want to find\nrun 'amt --help' for more assistance\nABORT")
-			if debugSwitch {
-				fmt.Println("DEBUG: Exit program")
-			}
-			os.Exit(-7)
-		}
-	}
-	if debugSwitch {
-		fmt.Printf("search term provided: %s\n", searchTerm)
+	// see if the user wants to search for a acronym record in the database
+	if len(searchTerm) > 0 {
+		searchRecord()
 	}
 
-	// update user that the database is open and acronym we will search for in how many records:
-	fmt.Printf("\nSearching for:  '%s'  across %s records - please wait...\n", searchTerm, humanize.Comma(recCount))
-
-	// flush any output to the screen
-	os.Stdout.Sync()
-
-	// Example record:
-	//   rowid 			: hidden internal sqlite record id
-	//   Acronym 		: 21CN
-	//   Definition 	: 21st Century Network
-	//   Description 	: A new BT network
-	//   Source 		: DFTS
-
-	// Example SQL queries
-	// Last inserted acronym record:
-	//		SELECT Acronym FROM acronyms Order by rowid DESC LIMIT 1;
-	// Search for acronym:
-	//		"select Acronym,Definition,Description,Source from ACRONYMS where Acronym like ? ORDER BY Source;", searchTerm
-
-	// run a SQL query to find any matching acronyms to that provided by the user
-	rows, err := db.Query("select Acronym,Definition,Description,Source from ACRONYMS where Acronym like ? ORDER BY Source;", searchTerm)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer rows.Close()
-
-	fmt.Printf("\nMatching results are:\n\n")
-	for rows.Next() {
-		// variables to hold returned database values - use []byte instead
-		// of string to get around NULL values issue error:
-		// 		" Scan error on column index 2: unsupported driver ->
-		//			Scan pair: <nil> -> *string"
-		var acronym, definition, description, source []byte
-		err := rows.Scan(&acronym, &definition, &description, &source)
-		if err != nil {
-			fmt.Printf("ERROR: reading database record: %v", err)
-		}
-		// print the current row to screen - need string(...) as values
-		// are bytes
-		fmt.Printf("ACRONYM: '%s' is: %s.\nDESCRIPTION: %s\nSOURCE: %s\n\n",
-			string(acronym), string(definition), string(description), string(source))
-	}
-	// check there were no other error while reading the database rows
-	err = rows.Err()
-	if err != nil {
-		fmt.Printf("ERROR: reading database row returned: %v", err)
-	}
+	// No specific application options given - show command line usage
+	// to help users in case they are stuck
+	fmt.Printf("\n")
+	flag.Usage()
 
 	// END OF MAIN()
 	fmt.Printf("\nAll is well\n")
