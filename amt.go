@@ -65,18 +65,12 @@ func init() {
 // main is the application start up function for amt
 func main() {
 
-	// confirm if debug mode is enabled
+	// confirm that debug mode is enabled and display other command
+	// line flags and their current status for confirmation
 	if debugSwitch {
 		log.Println("DEBUG: Debug mode enabled")
-		log.Printf("DEBUG: Debug mode enabled")
-	}
-
-	// print out start up banner
-	printBanner()
-
-	// if debug is enabled - confirm the command line parameters received
-	if debugSwitch {
-		log.Println("DEBUG: Command Line Arguments provided are:")
+		log.Printf("DEBUG: Number of command line arguments set by user is: %d", flag.NFlag())
+		log.Printf("DEBUG: Command line argument settings are:")
 		log.Println("\t\tDatabase name to use via command line:", dbName)
 		log.Println("\t\tAcronym to search for:", searchTerm)
 		log.Println("\t\tLook for similar matches:", strconv.FormatBool(wildLookUp))
@@ -86,23 +80,30 @@ func main() {
 		log.Println("\t\tShow the applications version:", strconv.FormatBool(addNew))
 	}
 
+	// a function that will run at the end of the program
+	defer func() {
+		// END OF MAIN()
+		fmt.Printf("\nAll is well\n")
+	}()
+
 	// override Go standard flag.Usage function to get better
 	// formating and output by using my own function instead
 	flag.Usage = func() {
 		myUsage()
 	}
 
-	// check if command line help was request?
-	if helpMe {
+	// print out start up banner
+	printBanner()
+
+	switch {
+	case helpMe:
 		flag.Usage()
 		versionInfo()
-		os.Exit(0)
-	}
-
-	// check if command line application version was request?
-	if showVer {
+		break
+	case showVer:
 		versionInfo()
-		os.Exit(0)
+		break
+
 	}
 
 	// check if a valid database file has been provided - either via the
@@ -136,8 +137,8 @@ func main() {
 
 	// get the SQLite database version we are comppiled with
 	fmt.Printf("SQLite3 Database Version:  %s\n", sqlVersion())
-	// get current record count for future use
-	recCount := checkCount()
+	// get current record count into global var for future use
+	recCount = checkCount()
 	fmt.Printf("Current record count is:  %s\n", humanize.Comma(recCount))
 	// show last acronym entered in the database for info
 	fmt.Printf("Last acronym entered was:  '%s'\n", lastAcronym())
@@ -152,12 +153,9 @@ func main() {
 		searchRecord()
 	}
 
-	// No specific application options given - show command line usage
-	// to help users in case they are stuck
-	fmt.Printf("\n")
+	// No specific application cli options given - show command line
+	// usage to help user in case they are stuck
+	versionInfo()
 	flag.Usage()
-
-	// END OF MAIN()
-	fmt.Printf("\nAll is well\n")
 
 }
