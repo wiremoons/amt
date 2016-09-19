@@ -241,25 +241,6 @@ func getSources() string {
 	return string(sourceList[idxFinal])
 }
 
-/*
-age := 27
-    rows, err := db.Query("SELECT name FROM users WHERE age=?", age)
-    if err != nil {
-            log.Fatal(err)
-    }
-    defer rows.Close()
-    for rows.Next() {
-            var name string
-            if err := rows.Scan(&name); err != nil {
-                    log.Fatal(err)
-            }
-            fmt.Printf("%s is %d\n", name, age)
-    }
-    if err := rows.Err(); err != nil {
-            log.Fatal(err)
-    }
-*/
-
 // addRecord function adds a new record to the acronym table held in
 // the SQLite database It does not take any parameters. It does not
 // return any information, and exits the program on completion. The
@@ -309,8 +290,9 @@ func addRecord() {
 		fmt.Printf("\nDatabase record count is: %s  [was: %s]\n",
 			humanize.Comma(newInsertCount), humanize.Comma(preInsertCount))
 	}
-	// leave the program as record entered ok
-	os.Exit(0)
+
+	// function complete
+	return
 }
 
 // searchRecord function obtains a string from the users and search
@@ -321,7 +303,7 @@ func addRecord() {
 //
 // The SQL insert statement used is:
 //
-//    select Acronym,Definition,Description,Source from ACRONYMS where
+//    select rowid,Acronym,Definition,Description,Source from ACRONYMS where
 //    Acronym like ? ORDER BY Source;
 func searchRecord() {
 	// start search for an acronym - update user's screen
@@ -344,7 +326,7 @@ func searchRecord() {
 
 	// run a SQL query to find any matching acronyms to that provided
 	// by the user
-	rows, err := db.Query("select Acronym,Definition,Description,Source from ACRONYMS where Acronym like ? ORDER BY Source;", searchTerm)
+	rows, err := db.Query("select rowid,Acronym,Definition,Description,Source from ACRONYMS where Acronym like ? ORDER BY Source;", searchTerm)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -358,21 +340,21 @@ func searchRecord() {
 		//
 		// " Scan error on column index 2: unsupported driver -> Scan
 		// pair: <nil> -> *string"
-		var acronym, definition, description, source []byte
-		err := rows.Scan(&acronym, &definition, &description, &source)
+		var rowid, acronym, definition, description, source []byte
+		err := rows.Scan(&rowid, &acronym, &definition, &description, &source)
 		if err != nil {
 			fmt.Printf("ERROR: reading database record: %v", err)
 		}
 		// print the current row to screen - need string(...) as
 		// values are bytes
-		fmt.Printf("ACRONYM: '%s' is: %s.\nDESCRIPTION: %s\nSOURCE: %s\n\n",
-			string(acronym), string(definition), string(description), string(source))
+		fmt.Printf("ID: %s\nACRONYM: '%s' is: %s.\nDESCRIPTION: %s\nSOURCE: %s\n\n",
+			string(rowid), string(acronym), string(definition), string(description), string(source))
 	}
 	// check there were no other error while reading the database rows
 	err = rows.Err()
 	if err != nil {
 		fmt.Printf("ERROR: reading database row returned: %v", err)
 	}
-	// leave the program as record searched ok
-	os.Exit(0)
+	// function complete ok
+	return
 }
