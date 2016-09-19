@@ -100,10 +100,6 @@ func main() {
 	}
 	printBanner()
 
-	// check if a valid database file has been provided - either via the
-	// environment variable $ACRODB or via the command line from the user
-	checkDB()
-
 	// check if a valid database file is available on the system
 	if debugSwitch {
 		log.Println("DEBUG: Calling 'checkDB()'")
@@ -117,10 +113,8 @@ func main() {
 	if debugSwitch {
 		log.Println("DEBUG: Calling 'openDB()'")
 	}
-
 	// open the database - or abort if fails get handle to database
 	// file as 'db' for future use
-	db, err = sql.Open("sqlite3", dbName)
 	err = openDB()
 	if err != nil {
 		log.Fatal(err)
@@ -132,16 +126,6 @@ func main() {
 	if err != nil {
 		panic(err.Error())
 	}
-	fmt.Println("Database connection status:  √")
-
-	// display the SQLite database version we are compiled with
-	fmt.Printf("SQLite3 Database Version:  %s\n", sqlVersion())
-	// get current record count into global var for future use
-	recCount = checkCount()
-	// display the current number acronym records held in the database
-	fmt.Printf("Current record count is:  %s\n", humanize.Comma(recCount))
-	// display last acronym entered in the database for info
-	fmt.Printf("Last acronym entered was:  '%s'\n", lastAcronym())
 
 	if debugSwitch {
 		log.Println("DEBUG: Start 'switch'...")
@@ -149,27 +133,73 @@ func main() {
 
 	switch {
 	case helpMe:
+		if debugSwitch {
+			log.Println("DEBUG: 'helpme' switch statement called")
+		}
 		flag.Usage()
-		versionInfo()
-		return
+		fallthrough
+
 	case showVer:
+		if debugSwitch {
+			log.Println("DEBUG: 'showVer' switch statement called")
+		}
 		versionInfo()
-		return
+
 	case addNew:
+		if debugSwitch {
+			log.Println("DEBUG: 'addNew' switch statement called")
+		}
 		addRecord()
-		return
+
 	case len(searchTerm) > 0:
+		if debugSwitch {
+			log.Println("DEBUG: search switch statement called")
+		}
 		searchRecord()
-		return
+
 	default:
 		if debugSwitch {
 			log.Println("DEBUG: Default switch statement called")
 		}
 		versionInfo()
 		flag.Usage()
-		return
 	}
 
 	// PROGRAM END
+	return
 
 }
+
+// runDBStartup is used to check the database file exists, it can be
+// opened ok and connected to in preparation for running other
+// functions against in the program
+//func runDBStartup() err error {
+//
+//	// check if a valid database file is available on the system
+//	if debugSwitch {
+//		log.Println("DEBUG: Calling 'checkDB()'")
+//	}
+//	err = checkDB()
+//	if err != nil {
+//		log.Fatal(err)
+//	}
+//
+//	// open the database and retrive initial and print to screen
+//	if debugSwitch {
+//		log.Println("DEBUG: Calling 'openDB()'")
+//	}
+//	// open the database - or abort if fails get handle to database
+//	// file as 'db' for future use
+//	err = openDB()
+//	if err != nil {
+//		log.Fatal(err)
+//	}
+//	defer db.Close()
+//
+//	// check the connection to database is ok
+//	err = db.Ping()
+//	if err != nil {
+//		panic(err.Error())
+//	}
+//
+//}
