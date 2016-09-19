@@ -14,7 +14,6 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/dustin/go-humanize"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -89,45 +88,42 @@ func main() {
 	// override Go standard flag.Usage() function to get better
 	// formating and output by using my own function instead
 	flag.Usage = func() {
+		if debugSwitch {
+			log.Println("DEBUG: Running flag.Usage override function")
+		}
 		myUsage()
 	}
 
 	// print out start up banner
-	printBanner()
-
-	// check for either 'help' or 'version' requests from the command
-	// line as can be provided prior to opening the database
-	switch {
-	case helpMe:
-		flag.Usage()
-		versionInfo()
-		// exit as we are done
-		return
-	case showVer:
-		versionInfo()
-		// exit as we are done
-		return
+	if debugSwitch {
+		log.Println("DEBUG: Calling 'printBanner()'")
 	}
+	printBanner()
 
 	// check if a valid database file has been provided - either via the
 	// environment variable $ACRODB or via the command line from the user
 	checkDB()
 
+	// check if a valid database file is available on the system
 	if debugSwitch {
-		fmt.Printf("DEBUG: Opening database: '%s' ... ", dbName)
+		log.Println("DEBUG: Calling 'checkDB()'")
+	}
+	err = checkDB()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// open the database and retrive initial and print to screen
+	if debugSwitch {
+		log.Println("DEBUG: Calling 'openDB()'")
 	}
 
 	// open the database - or abort if fails get handle to database
 	// file as 'db' for future use
 	db, err = sql.Open("sqlite3", dbName)
+	err = openDB()
 	if err != nil {
-
-		if debugSwitch {
-			log.Printf("DEBUG: FAILED to open %s with error: %v - will exit application\n", dbName, err)
-			log.Println("DEBUG: Exit program with call to 'log.Fatal()'")
-		}
-
-		log.Fatalf("FATAL ERROR: unable to get handle to SQLite database file: %s\nError is: %v\n", dbName, err)
+		log.Fatal(err)
 	}
 	defer db.Close()
 
@@ -147,22 +143,33 @@ func main() {
 	// display last acronym entered in the database for info
 	fmt.Printf("Last acronym entered was:  '%s'\n", lastAcronym())
 
-	// see if the user want to add a new record via the -n command line switch
-	if addNew {
+	if debugSwitch {
+		log.Println("DEBUG: Start 'switch'...")
+	}
+
+	switch {
+	case helpMe:
+		flag.Usage()
+		versionInfo()
+		return
+	case showVer:
+		versionInfo()
+		return
+	case addNew:
 		addRecord()
 		return
-	}
-
-	// see if the user wants to search for a acronym record in the database
-	if len(searchTerm) > 0 {
+	case len(searchTerm) > 0:
 		searchRecord()
+		return
+	default:
+		if debugSwitch {
+			log.Println("DEBUG: Default switch statement called")
+		}
+		versionInfo()
+		flag.Usage()
 		return
 	}
 
-	// No specific application cli options given - show command line
-	// usage to help user in case they are stuck
-	versionInfo()
-	flag.Usage()
+	// PROGRAM END
 
-	return
 }
