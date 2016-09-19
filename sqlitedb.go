@@ -50,8 +50,7 @@ func checkDB() (err error) {
 	if dbName == "" {
 		// nothing provided via command line...
 		if debugSwitch {
-			log.Print("DEBUG: No database name provided via ")
-			log.Println("command line input - check environment instead...")
+			log.Print("DEBUG: No database name provided via cli - check environment instead...")
 			log.Println("DEBUG: Environment variable $ACRODB is:", os.Getenv("ACRODB"))
 		}
 
@@ -79,7 +78,7 @@ func checkDB() (err error) {
 
 	// dbName is not empty if we got here
 	if debugSwitch {
-		log.Printf("DEBUG: database provided is: %s", dbName)
+		log.Printf("DEBUG: database filename provided is: %s", dbName)
 		log.Printf("DEBUG: Checking file stats for: '%s'\n", dbName)
 	}
 
@@ -128,7 +127,7 @@ func checkDB() (err error) {
 func openDB() (err error) {
 
 	if debugSwitch {
-		fmt.Printf("DEBUG: Attempting to open the database: '%s' ... ", dbName)
+		log.Printf("DEBUG: Attempting to open the database: '%s' ... ", dbName)
 	}
 
 	// open the database - or abort if fails. If successful get the
@@ -170,7 +169,7 @@ func openDB() (err error) {
 func checkCount() int64 {
 
 	if debugSwitch {
-		log.Println("DEBUG: Getting record count function... ")
+		log.Println("DEBUG: running record count function 'checkCount()' ... ")
 	}
 	// create variable to hold returned database count of records
 	var recCount int64
@@ -237,7 +236,7 @@ func sqlVersion() string {
 		log.Printf("ERROR: in function 'sqlVersion()' with SQL QueryRow (dbVer): %v\n", err)
 	}
 	if debugSwitch {
-		log.Printf("DEBUG: last acronym entry in table returned: %s\n", dbVer)
+		log.Printf("DEBUG: function 'sqlVersion()' returned value from query: %s\n", dbVer)
 	}
 	// return the result
 	return dbVer
