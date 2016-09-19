@@ -86,7 +86,7 @@ func main() {
 		fmt.Printf("\nAll is well\n")
 	}()
 
-	// override Go standard flag.Usage function to get better
+	// override Go standard flag.Usage() function to get better
 	// formating and output by using my own function instead
 	flag.Usage = func() {
 		myUsage()
@@ -95,27 +95,30 @@ func main() {
 	// print out start up banner
 	printBanner()
 
+	// check for either 'help' or 'version' requests from the command
+	// line as can be provided prior to opening the database
 	switch {
 	case helpMe:
 		flag.Usage()
 		versionInfo()
-		break
+		// exit as we are done
+		return
 	case showVer:
 		versionInfo()
-		break
-
+		// exit as we are done
+		return
 	}
 
 	// check if a valid database file has been provided - either via the
 	// environment variable $ACRODB or via the command line from the user
 	checkDB()
 
-	// open the database - or abort if fails
 	if debugSwitch {
 		fmt.Printf("DEBUG: Opening database: '%s' ... ", dbName)
 	}
 
-	// get handle to database file
+	// open the database - or abort if fails get handle to database
+	// file as 'db' for future use
 	db, err = sql.Open("sqlite3", dbName)
 	if err != nil {
 
@@ -128,29 +131,32 @@ func main() {
 	}
 	defer db.Close()
 
-	// check connection to database is ok
+	// check the connection to database is ok
 	err = db.Ping()
 	if err != nil {
 		panic(err.Error())
 	}
 	fmt.Println("Database connection status:  √")
 
-	// get the SQLite database version we are comppiled with
+	// display the SQLite database version we are compiled with
 	fmt.Printf("SQLite3 Database Version:  %s\n", sqlVersion())
 	// get current record count into global var for future use
 	recCount = checkCount()
+	// display the current number acronym records held in the database
 	fmt.Printf("Current record count is:  %s\n", humanize.Comma(recCount))
-	// show last acronym entered in the database for info
+	// display last acronym entered in the database for info
 	fmt.Printf("Last acronym entered was:  '%s'\n", lastAcronym())
 
 	// see if the user want to add a new record via the -n command line switch
 	if addNew {
 		addRecord()
+		return
 	}
 
 	// see if the user wants to search for a acronym record in the database
 	if len(searchTerm) > 0 {
 		searchRecord()
+		return
 	}
 
 	// No specific application cli options given - show command line
@@ -158,4 +164,5 @@ func main() {
 	versionInfo()
 	flag.Usage()
 
+	return
 }
