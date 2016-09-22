@@ -1,3 +1,10 @@
+// amt - program to access an SQLite database and lookup acronyms
+//
+// author:	Simon Rowe <simon@wiremoons.com>
+// license: open-source released under The MIT License (MIT).
+//
+// Package used to display output for application 'amt'
+
 package main
 
 import (
@@ -10,14 +17,15 @@ import (
 	"text/template"
 )
 
-// getInput asks user a question and return their answer.
-// The question is provided to the function as a string 'question' and
-// the users response is returned as a string 'response'.
+// getInput function asks the user a question and returns their
+// answer. The question is provided to the function as a string
+// 'question' and the users response is returned by the function as a
+// string 'response'.
 func getInput(question string) string {
 	if debugSwitch {
 		fmt.Println("\nDEBUG: in function 'getInput' ...")
 	}
-	// create a new reader from stdin
+	// create a new reader from and attached to stdin
 	reader := bufio.NewReader(os.Stdin)
 	// ask the user the question passed to the function
 	fmt.Printf("%s", question)
@@ -26,10 +34,12 @@ func getInput(question string) string {
 	if debugSwitch {
 		fmt.Printf("\nDEBUG: user provided input: '%s' \n", response)
 	}
-	// remove the trailing newline (Unix/Mac) or return and newline (Windows)
-	// from the string provided by the user, as the ReadString() keeps any line
-	// suffix (\n or \r\n) when it returns.
-	// If 'response' doesn't end with either suffix, it is returned unchanged - so no harm done!
+	// remove the trailing newline (Unix/Mac) or both the newline and
+	// return (Windows) from the input string provided by the user. As
+	// the ReadString() function keeps any line suffix ('\n' or
+	// '\r\n)' when it returns, both are required to ensure options
+	// are covered. If 'response' doesn't end with either suffix, it
+	// is returned unchanged - so no harm done!
 	response = strings.TrimSuffix(response, "\n")
 	response = strings.TrimSuffix(response, "\r")
 	if debugSwitch {
@@ -41,19 +51,19 @@ func getInput(question string) string {
 	return response
 }
 
-// checkContinue asks the user if they would like to continue with the
-// currently running part of the application.
+// checkContinue function asks the user if they would like to continue
+// with the currently running part of the application.
 //
 // checkContinue function reads input from the users console to see if
 // they provide a a 'y' or 'n' response.
 //
 // The function returns a bool depending on the users response.
-// if the response contains the letter 'y' it returns 'true'. Any other
+// If the response contains the letter 'y' it returns 'true'. Any other
 // response will return 'false'.
 func checkContinue() bool {
 	// create a new reader from stdin
 	reader := bufio.NewReader(os.Stdin)
-	// ask the user a question
+	// ask the user if they wish to continue
 	fmt.Print("Continue? [y/n]: ")
 	// read the users response - terminating their input on newline
 	response, _ := reader.ReadString('\n')
@@ -68,8 +78,8 @@ func checkContinue() bool {
 	return false
 }
 
-// printBanner is used to print out program banner which displays:
-// application name and application version
+// printBanner function is used to print out a small program banner
+// which displays the application name.
 func printBanner() {
 	fmt.Println("\n\t\t\tAcronym Management Tool 'amt'")
 	fmt.Println("\t\t\t¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯")
@@ -96,14 +106,16 @@ Running '{{.appname}}' version {{.appversion}}
 		"compiler":   runtime.Compiler,
 		"version":    runtime.Version(),
 	}
-	//
+	// check and build the template so the data field values are added
+	// and the final output is displayed. Check for any error, and
+	// abort if one is found.
 	t := template.Must(template.New("appinf").Parse(appInfoTmpl))
 	if err := t.Execute(os.Stdout, data); err != nil {
 		log.Fatalf("FATAL ERROR: in function 'versionInfo()' when building template with err: %v", err)
 	}
 }
 
-// myUsage replaces the standard flag.Usage() function from Go. The
+// myUsage function replaces the standard flag.Usage() function from Go. The
 // function takes no paramaters, but outputs the command line flags
 // that can be used when running the program.
 func myUsage() {
@@ -111,15 +123,16 @@ func myUsage() {
 	usageText := `
 Usage of ./amt:
 
-        Flag             Description                                        Default Value
-        ¯¯¯¯             ¯¯¯¯¯¯¯¯¯¯¯                                        ¯¯¯¯¯¯¯¯¯¯¯¯¯
-        -d               show debug output                                  false
-        -f <filename>    provide filename and path to SQLite database       optional
-        -h               display help for this program                      false
-        -n               add a new acronym record                           optional
-        -s <acronym>     provide acronym to search for                      optional
-        -v               display program version                            false
-        -w               search for any similar matches                     false
+        Flag               Description                                        Default Value
+        ¯¯¯¯               ¯¯¯¯¯¯¯¯¯¯¯                                        ¯¯¯¯¯¯¯¯¯¯¯¯¯
+        -d                 show debug output                                  false
+        -f <filename>      provide filename and path to SQLite database       optional
+        -h                 display help for this program                      false
+        -n                 add a new acronym record                           optional
+        -s <acronym>       provide acronym to search for                      optional
+        -r <acronym id>    provide acronym id to remove                       optional
+        -v                 display program version                            false
+        -w                 search for any similar matches                     false
 `
 	fmt.Println(usageText)
 
