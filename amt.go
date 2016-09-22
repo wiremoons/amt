@@ -20,7 +20,7 @@ import (
 // SET GLOBAL VARIABLES
 
 // set the version of the app here
-var appversion = "0.5.4"
+var appversion = "0.5.5"
 var appname string
 
 // below are the flag variables used for command line args
@@ -31,6 +31,7 @@ var debugSwitch bool
 var helpMe bool
 var addNew bool
 var showVer bool
+var rmid string
 
 // used to keep track of database record count
 var recCount int64
@@ -50,6 +51,7 @@ func init() {
 	// description is used by flag.Usage() on error or for help output
 	flag.StringVar(&dbName, "f", "", "\tprovide SQLite database `filename` and path")
 	flag.StringVar(&searchTerm, "s", "", "\t`acronym` to search for")
+	flag.StringVar(&rmid, "r", "", "\t`acronym id` to remove")
 	flag.BoolVar(&wildLookUp, "w", false, "\tsearch for any similar matches")
 	flag.BoolVar(&debugSwitch, "d", false, "\tshow debug output")
 	flag.BoolVar(&helpMe, "h", false, "\tdisplay help for this program")
@@ -72,6 +74,7 @@ func main() {
 		log.Printf("DEBUG: Command line argument settings are:")
 		log.Println("\t\tDatabase name to use via command line:", dbName)
 		log.Println("\t\tAcronym to search for:", searchTerm)
+		log.Println("\t\tAcronym to remove:", rmid)
 		log.Println("\t\tLook for similar matches:", strconv.FormatBool(wildLookUp))
 		log.Println("\t\tDisplay additional debug output when run:", strconv.FormatBool(debugSwitch))
 		log.Println("\t\tDisplay additional help information:", strconv.FormatBool(helpMe))
@@ -157,6 +160,12 @@ func main() {
 		}
 		searchRecord()
 
+	case len(rmid) > 0:
+		if debugSwitch {
+			log.Println("DEBUG: remove switch statement called")
+		}
+		_ = RemoveRecord(rmid)
+
 	default:
 		if debugSwitch {
 			log.Println("DEBUG: Default switch statement called")
@@ -169,37 +178,3 @@ func main() {
 	return
 
 }
-
-// runDBStartup is used to check the database file exists, it can be
-// opened ok and connected to in preparation for running other
-// functions against in the program
-//func runDBStartup() err error {
-//
-//	// check if a valid database file is available on the system
-//	if debugSwitch {
-//		log.Println("DEBUG: Calling 'checkDB()'")
-//	}
-//	err = checkDB()
-//	if err != nil {
-//		log.Fatal(err)
-//	}
-//
-//	// open the database and retrive initial and print to screen
-//	if debugSwitch {
-//		log.Println("DEBUG: Calling 'openDB()'")
-//	}
-//	// open the database - or abort if fails get handle to database
-//	// file as 'db' for future use
-//	err = openDB()
-//	if err != nil {
-//		log.Fatal(err)
-//	}
-//	defer db.Close()
-//
-//	// check the connection to database is ok
-//	err = db.Ping()
-//	if err != nil {
-//		panic(err.Error())
-//	}
-//
-//}
