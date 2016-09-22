@@ -11,7 +11,9 @@
 //   rowid 			: hidden internal sqlite record id
 //   Acronym 		: 21CN
 //   Definition 	: 21st Century Network
-//   Description 	: A new BT network
+//   Description    : A new BT Plc network infrastructure consolidating
+//                    multiple legacy networks into one common internet protocol
+//                    platform.
 //   Source 		: DFTS
 
 package main
@@ -31,10 +33,11 @@ import (
 // has been provided by the user.
 //
 // The database file name can be provided to the program via the
-// command line or via an environment variable named: ACRODB. The
-// function checks ensure the database file name exists, obtains its
-// size on disk and checks it file permissions. These items are
-// output to stdout by the function.
+// command line or via an environment variable named: ACRODB.
+//
+// The function checks to ensure the database file name provided
+// exists, obtains its size on disk and checks it file permissions.
+// These items are output to stdout by the function.
 //
 // The checkDB function returns an error if it fails to find a valid
 // database file or one that can not be opened successfully. If the
@@ -306,8 +309,8 @@ func addRecord() {
 		log.Printf("DEBUG: Adding new record function... \n")
 	}
 	// update screen for user
-	fmt.Printf("\n\nADDING NEW RECORD\n¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯\n")
-	fmt.Printf("Note: To abort the input of a new record - press 'Ctrl + c'\n\n")
+	fmt.Printf("\n\nADD A NEW ACRONYM RECORD\n¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯\n")
+	fmt.Printf("Note: To abort the input of a new record press keys:  Ctrl + c \n\n")
 	// get new acronym from user
 	acronym := getInput("Enter the new acronym: ")
 	// todo: check the acronym does not already exist - check with user to continue...
@@ -351,20 +354,20 @@ func addRecord() {
 // program on completion. The applcation will exit of there is an
 // error.
 //
-// The SQL insert statement used is:
+// The SQL select statement used is:
 //
 //    select rowid,Acronym,Definition,Description,Source from ACRONYMS where
 //    Acronym like ? ORDER BY Source;
 func searchRecord() {
 	// start search for an acronym - update user's screen
-	fmt.Printf("\n\nSEARCH FOR ACRONYM\n¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯\n")
+	fmt.Printf("\n\nSEARCH FOR AN ACRONYM RECORD\n¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯\n")
 	//
 	// check we have a term to search for in the acronyms database:
 	if debugSwitch {
-		fmt.Printf("DEBUG: checking for a search term ... ")
+		log.Printf("DEBUG: checking for a search term ... ")
 	}
 	if debugSwitch {
-		fmt.Printf("search term provided: %s\n", searchTerm)
+		log.Printf("DEBUG: search term provided: %s\n", searchTerm)
 	}
 	// update user that the database is open and acronym we will
 	// search for in how many records:
@@ -393,7 +396,7 @@ func searchRecord() {
 		var rowid, acronym, definition, description, source []byte
 		err := rows.Scan(&rowid, &acronym, &definition, &description, &source)
 		if err != nil {
-			fmt.Printf("ERROR: reading database record: %v", err)
+			log.Printf("ERROR: reading database record: %v", err)
 		}
 		// print the current row to screen - need string(...) as
 		// values are bytes
@@ -403,8 +406,116 @@ func searchRecord() {
 	// check there were no other error while reading the database rows
 	err = rows.Err()
 	if err != nil {
-		fmt.Printf("ERROR: reading database row returned: %v", err)
+		log.Printf("ERROR: reading database row returned: %v", err)
 	}
 	// function complete ok
 	return
+}
+
+// RemoveRecord function is used to remove (ie delete) a record from
+// the Acronyms database. The record to be removed is identified by
+// its 'rowid' number. The record to be removed is first displayed to
+// allow the user to check it is the correct one, and on confirmation
+// the record if removed from the ACRONYMS table.
+//
+// The 'rowid' of the record is obtained from the user via the command
+// line switch '-r'. This 'rowid' is held in the global variable
+// 'rmid'. The 'rowid' is provided to the function when called as a
+// string value named 'rmid'.
+//
+// The RemoveRecord function returns either 'nil' as a err value ot
+// type error, or detials of any actual error that occurs when it
+// runs.
+//
+// The SQL delete statement used is:
+//
+//    delete from ACRONYMS where rowid = ?;
+func RemoveRecord(rmid string) (err error) {
+	// start remove for an acronym - update user's screen
+	fmt.Printf("\n\nREMOVE AN ACRONYM RECORD\n¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯\n")
+	//
+	// check we have a rowid to remove from the acronyms database table:
+	if debugSwitch {
+		log.Printf("DEBUG: checking for a search term ... ")
+	}
+	if debugSwitch {
+		log.Printf("DEBUG: record 'rowid' to remove is: %s\n", rmid)
+	}
+	if rmid == "" {
+		log.Println("ERROR: an 'Acronym ID' for the record to be removed needs to be provided.")
+		log.Println("An acronyms record 'ID' is shown as part of the output of a valid search result.")
+		err = errors.New("ERROR: empty value provided for 'Acronym ID' in record removal request.")
+		return err
+	}
+
+	// validate the rowid is valid integer number as used by
+	// SQLite 'rowid' for a table
+	if _, err := strconv.ParseInt(rmid, 10, 64); err != nil {
+		fmt.Printf("\nERROR: acronym ID '%v' is not a valid number.\n", rmid)
+		fmt.Printf("Please provide a acronym 'ID' number for the record you want to delete from the database.\n")
+		err = errors.New("Unable to find integer in acronym ID value: '%s'. Error returned: '%v'.")
+		return err
+	}
+
+	// update user that the database is open and the acronym we will
+	// remove is one of a number of records:
+	fmt.Printf("\nSearching for Acronym ID:  '%s'  across %s records - please wait...\n",
+		rmid, humanize.Comma(recCount))
+	// flush any output to the screen
+	os.Stdout.Sync()
+
+	// run a SQL query to find the matching acronym to the 'rowid'
+	// provided by the user - should return a single row result or and
+	// error is there is no match to the rowid
+	var rowid, acronym, definition, description, source []byte
+	err = db.QueryRow("select rowid,Acronym,Definition,Description,Source from ACRONYMS where rowid = ?",
+		rmid).Scan(&rowid, &acronym, &definition, &description, &source)
+	// check the results obtained are good
+	switch {
+	// no match found
+	case err == sql.ErrNoRows:
+		fmt.Printf("\nNo acronym with ID: '%s' found in the database\n", rmid)
+		return err
+	// unknown error returned
+	case err != nil:
+		fmt.Printf("\nUnable to find acronym ID '%s' as query retured: %v\n", rmid, err)
+		return err
+		// match found so print out results
+	default:
+		fmt.Printf("\nRecord match found:\n\n")
+		fmt.Printf("ID: %s\nACRONYM: '%s' is: %s.\nDESCRIPTION: %s\nSOURCE: %s\n\n",
+			string(rowid), string(acronym), string(definition), string(description), string(source))
+		fmt.Printf("\nRemove record ID '%s' for acronym: '%s'.    ", string(rmid), string(acronym))
+	}
+
+	// Check with the user that the record shown above is the one they
+	// want to remove, before it is actually removed from the table
+	if !checkContinue() {
+		fmt.Printf("Removal of Acronym ID '%s' aborted at users request\n", rmid)
+		err = errors.New("Removal of Acronym ID '%s' aborted at users request\n")
+		return err
+	}
+
+	fmt.Printf("Removing Acronym ID '%s' ...\n", rmid)
+	// get current database record count
+	preInsertCount := checkCount()
+
+	// ok - remove record to the database table
+	_, err = db.Exec("delete from ACRONYMS where rowid = ?", rmid)
+	if err != nil {
+		log.Fatalf("FATAL ERROR removing acronym record: %v\n", err)
+	}
+	// get new database record count post insert
+	newInsertCount := checkCount()
+	// inform user of difference in database record counts -
+	// should be 1
+	fmt.Printf("SUCCESS: %d record removed to the database\n",
+		(preInsertCount - newInsertCount))
+	// inform user of database record counts
+	fmt.Printf("\nDatabase record count is: %s  [was: %s]\n",
+		humanize.Comma(newInsertCount), humanize.Comma(preInsertCount))
+
+	// function complete
+	return err
+
 }
