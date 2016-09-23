@@ -20,6 +20,8 @@ WIN64=GOOS=windows GOARCH=amd64
 MAC32=GOOS=darwin GOARCH=386
 # To build Mac OS X 64 bit version:
 MAC64=GOOS=darwin GOARCH=amd64
+# To build FreeBSD 64 bit version:
+FREE64=GOOS=freebsd GOARCH=amd64
 
 $(OUTNAME): $(SRC)
 	$(LIN64) $(CC) $(CFLAGS) -o $(OUTNAME) $(SRC)
@@ -42,10 +44,13 @@ mac32: $(SRC)
 mac64: $(SRC)
 	$(MAC64) $(CC) $(CFLAGS) -o $(OUTNAME)-macx64 $(SRC)
 
+free64: $(SRC)
+	$(FREE64) $(CC) $(CFLAGS) -o $(OUTNAME)-freebsd64 $(SRC)
+
 run: $(SRC)
 	$(CC) $(RFLAGS) $(SRC)
 
 clean:
-	rm $(OUTNAME).exe $(OUTNAME)-x64.exe $(OUTNAME)-x386.exe $(OUTNAME) $(OUTNAME)-x386 $(OUTNAME)-macx64 $(OUTNAME)-mac386
+	rm $(OUTNAME).exe $(OUTNAME)-x64.exe $(OUTNAME)-x386.exe $(OUTNAME) $(OUTNAME)-x386 $(OUTNAME)-macx64 $(OUTNAME)-mac386 $(OUTNAME)-freebsd64
 
-all: lin64 win32 win64 mac64
+all: lin64 win32 win64 mac64 free64
