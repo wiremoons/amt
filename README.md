@@ -18,37 +18,45 @@ The `amt` program accesses a SQLite database and looks up the requested acronym 
 
 ## Database Location
 
-By default the database used to store the acronyms will be located in the same
-directory as the programs executable.
+The location of the SQLite database used to store the acronyms is
+searched for in the following locations, and in the order given below:
 
-However this can be overridden if preferred, and the location of the database
-can be stored in an environment variable called *ACRODB*. You should set this
-to the path and preferred database file name of your acronyms database.
-Examples of how to set this for different operating systems are shown below.
+1. A file name provided by the user on the command line using the `-f <your-db-file.db>` input;
+2. A file name provided via the environment variable '*ACRODB*';
+3. A file named '*amt-db.db*' that is located in the same directory as the program executable.
 
-On Linux and similar operating systems when using bash shell:
+If you would like to keep your database in a specific location on your
+computer, then the best approach is to store it in you preferred
+location, and then put the full path and database file name in an
+environment variable called: *ARCOBD*.
+
+Examples of how to set this environment variable for different
+operating systems are shown below.
+
+On Linux, FreeBSD, MacOSX, and similar operating systems when using
+bash shell:
 
 ```
-export acrodb=/home/simon/work/acrotool/sybil.db
+export ACRODB=/home/simon/work/databases/amt-db.db
 ```
 
 on Windows or Linux when using Microsoft Powershell:
 
 ```
-$env:acrodb += "c:\users\simon\work\scratch\sybil\sybil.db"
+$env:ACRODB += "c:\users\simon\work\databases\amt-db.db"
 ```
 
 on Windows when using a cmd.exe console:
 
 ```
-set acrodb=c:\users\simon\work\scratch\sybil\sybil.db
+set ACRODB=c:\users\simon\work\databases\amt-db.db
 ```
 
-or Windows to add persistently to your environment run the following in a
-cmd.exe console:
+or Windows to add persistently to your environment run the following
+in a cmd.exe console:
 
 ```
-setx acrodb=c:\users\simon\work\scratch\sybil\sybil.db
+setx ACRODB=c:\users\simon\work\databases\amt-db.db
 ```
 
 ### Using amt

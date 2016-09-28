@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"strconv"
 
 	"github.com/dustin/go-humanize"
@@ -48,13 +49,14 @@ import (
 // 'dbname' to the valid path and file name of the SQlite database to
 // be used.
 func checkDB() (err error) {
-	// check if user has specified the location of the database to use
-	// via command line - so can override environment variable setting
+	// check if user has specified the location of the database using
+	// the command line '-f' flag. Using the command line flag can
+	// therefore override environment variable setting or database
+	// file located in the same directory as the executable
 	if dbName == "" {
 		// nothing provided via command line...
 		if debugSwitch {
 			log.Print("DEBUG: No database name provided via cli - check environment instead...")
-			log.Println("DEBUG: Environment variable $ACRODB is:", os.Getenv("ACRODB"))
 		}
 
 		// get contents of environment variable $ACRODB as no filename
@@ -67,15 +69,29 @@ func checkDB() (err error) {
 
 			if debugSwitch {
 				log.Println("DEBUG: No database name provided via environment variable ACRODB")
-				log.Println("DEBUG: Exit program")
+				log.Println("DEBUG: Environment variable $ACRODB is:", os.Getenv("ACRODB"))
 			}
 
-			// no database name provided via environment variable so
-			// inform user with an error
-			//
-			// TODO : offer to create on instead here...?
-			err = errors.New("FATAL ERROR: please provide the name of a database containing your acronyms\nrun 'amt --help' for more assistance\n")
-			return err
+			// final attempt to find a useable database - look in the
+			// same diretcory as the program executable for a file called: amt-db.db
+
+			dbName = filepath.Join(filepath.Dir(os.Args[0]), "amt-db.db")
+
+			if debugSwitch {
+				log.Printf("DEBUG: Looking for 'amt-db.db' in same location as executable: '%s'\n", filepath.Dir(os.Args[0]))
+			}
+
+			// quick check to see if file exists - full check will be done below
+			_, err := os.Stat(dbName)
+			if err != nil {
+				// TODO : offer to create on instead here...?
+				err = errors.New("FATAL ERROR: please provide the name of a database containing your acronyms\nrun 'amt --help' for more assistance\n")
+				return err
+			}
+
+			if debugSwitch {
+				log.Printf("DEBUG: Database file: '%s' exists - attemping to use...\n", dbName)
+			}
 		}
 	}
 
@@ -91,7 +107,7 @@ func checkDB() (err error) {
 		mode := fi.Mode()
 
 		if debugSwitch {
-			log.Printf("DEBUG: checking is '%s' is a regular file with os.Stat() call\n", dbName)
+			log.Printf("DEBUG: checking if '%s' is a regular file with os.Stat() call\n", dbName)
 		}
 
 		// check is a regular file
