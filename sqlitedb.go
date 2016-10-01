@@ -460,7 +460,7 @@ func RemoveRecord(rmid string) (err error) {
 	if rmid == "" {
 		log.Println("ERROR: an 'Acronym ID' for the record to be removed needs to be provided.")
 		log.Println("An acronyms record 'ID' is shown as part of the output of a valid search result.")
-		err = errors.New("ERROR: empty value provided for 'Acronym ID' in record removal request.")
+		err = errors.New("ERROR: empty value provided for 'Acronym ID' in record removal request")
 		return err
 	}
 
