@@ -19,11 +19,11 @@ import (
 
 // SET GLOBAL VARIABLES
 
-// set the version of the app here
+// set the version of the app here prep var to hold app name
 var appversion = "0.5.5"
 var appname string
 
-// below are the flag variables used for command line args
+// flag() variables used for command line args
 var dbName string
 var searchTerm string
 var wildLookUp bool
@@ -42,13 +42,13 @@ var err error
 // create a global db handle - so can be used across functions
 var db *sql.DB
 
-// init always runs before applications main() function and is used here to
-// set-up the required 'flag' variables from the command line parameters
-// provided by the user when they run the app.
+// init() always runs before the applications main() function and is
+// used here to set-up the flag() variables from the command line
+// parameters - which are provided by the user when they run the app.
 func init() {
 	// flag types available are: IntVar; StringVar; BoolVar
-	// flag parameters are: variable, cmd line flag, initial value, description
-	// description is used by flag.Usage() on error or for help output
+	// flag parameters are: variable; cmd line flag; initial value; description.
+	// 'description' is used by flag.Usage() on error or for help output
 	flag.StringVar(&dbName, "f", "", "\tprovide SQLite database `filename` and path")
 	flag.StringVar(&searchTerm, "s", "", "\t`acronym` to search for")
 	flag.StringVar(&rmid, "r", "", "\t`acronym id` to remove")
@@ -66,8 +66,8 @@ func init() {
 // main is the application start up function for amt
 func main() {
 
-	// confirm that debug mode is enabled and display other command
-	// line flags and their current status for confirmation
+	// confirm if debug mode is enabled and display other command line
+	// flags and their current status
 	if debugSwitch {
 		log.Println("DEBUG: Debug mode enabled")
 		log.Printf("DEBUG: Number of command line arguments set by user is: %d", flag.NFlag())
@@ -109,10 +109,23 @@ func main() {
 	}
 	err = checkDB()
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		// no database found - offer to create one
+		fmt.Printf("\nCreate a new database and add a few example acronyms?")
+		if !checkContinue() {
+			// no datbase available - exit application
+			log.Fatal("ERROR: unable to continue without a valid acronym database.\n")
+		}
+		// user wants a new database - so attempt to create one in the
+		// same directory as the program executable using the file
+		// name: 'amt-db.db' - set location here then attempt to open
+		// it
+		dbName = filepath.Join(filepath.Dir(os.Args[0]), "amt-db.db")
+
 	}
 
-	// open the database and retrive initial and print to screen
+	// open the database and retrive initial data - then print to
+	// screen for users benefit
 	if debugSwitch {
 		log.Println("DEBUG: Calling 'openDB()'")
 	}
@@ -128,6 +141,20 @@ func main() {
 	err = db.Ping()
 	if err != nil {
 		panic(err.Error())
+	}
+
+	// attempt to populate the datbase with some example records if it
+	// is empty - ask user first
+	if recCount == 0 {
+		fmt.Println("\nWould you like to add some initial records to your empty acronyms database?")
+		if checkContinue() {
+
+			err = popNewDB()
+			if err != nil {
+				// records could not be added - exit application
+				log.Fatal("ERROR: aborting program with error: %v\n", err)
+			}
+		}
 	}
 
 	if debugSwitch {

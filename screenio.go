@@ -25,7 +25,7 @@ func getInput(question string) string {
 	if debugSwitch {
 		fmt.Println("\nDEBUG: in function 'getInput' ...")
 	}
-	// create a new reader from and attached to stdin
+	// create a new reader and attached to stdin
 	reader := bufio.NewReader(os.Stdin)
 	// ask the user the question passed to the function
 	fmt.Printf("%s", question)
@@ -47,7 +47,7 @@ func getInput(question string) string {
 	}
 	// flush any output to the screen
 	os.Stdout.Sync()
-	// return the string from the user to the calling function
+	// return the string read from the user to the calling function
 	return response
 }
 

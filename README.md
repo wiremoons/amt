@@ -155,6 +155,15 @@ All is well
 ```
 
 
+## Possible Future Development Areas
+
+A list of future improvements and possible development enhancements are:
+
+- *Create new database* - if run and the user does not have a database, then offer to create one and populate it with a few example acronyms to get them started
+- *Alternative to debubSwitch* - the debug is managed via a command line flag `-d`. The code is full of `if debugSwitch {}` call that maybe better moved to a Go test instead to check if that area of code works as expected?
+
+If you have ideas for improvement they can be suggested via the GitHub issues facilty for this project. Just mark your submitted issue as a *TODO* or *SUGGESTION*.
+
 
 ## License
 

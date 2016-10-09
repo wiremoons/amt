@@ -14,7 +14,7 @@
 //   Description    : A new BT Plc network infrastructure consolidating
 //                    multiple legacy networks into one common internet protocol
 //                    platform.
-//   Source 		: DFTS
+//   Source 		: General ICT
 
 package main
 
@@ -51,20 +51,19 @@ import (
 func checkDB() (err error) {
 	// check if user has specified the location of the database using
 	// the command line '-f' flag. Using the command line flag can
-	// therefore override environment variable setting or database
+	// therefore override the environment variable setting or database
 	// file located in the same directory as the executable
 	if dbName == "" {
 		// nothing provided via command line...
 		if debugSwitch {
-			log.Print("DEBUG: No database name provided via cli - check environment instead...")
+			log.Print("DEBUG: No database name provided via cli - checking environment instead...")
 		}
 
-		// get contents of environment variable $ACRODB as no filename
-		// given on command line
+		// get contents of environment variable $ACRODB
 		dbName = os.Getenv("ACRODB")
 
 		// check if a database name and path was provided via the
-		// environment variable
+		// environment variable?
 		if dbName == "" {
 
 			if debugSwitch {
@@ -72,8 +71,9 @@ func checkDB() (err error) {
 				log.Println("DEBUG: Environment variable $ACRODB is:", os.Getenv("ACRODB"))
 			}
 
-			// final attempt to find a useable database - look in the
-			// same diretcory as the program executable for a file called: amt-db.db
+			// final attempt to find a useable database - so look in
+			// the same diretcory as the program executable for a file
+			// called: amt-db.db
 
 			dbName = filepath.Join(filepath.Dir(os.Args[0]), "amt-db.db")
 
@@ -81,11 +81,11 @@ func checkDB() (err error) {
 				log.Printf("DEBUG: Looking for 'amt-db.db' in same location as executable: '%s'\n", filepath.Dir(os.Args[0]))
 			}
 
-			// quick check to see if file exists - full check will be done below
+			// quick check to see if file exists - full check will be done below if it gets that far...
 			_, err := os.Stat(dbName)
 			if err != nil {
-				// TODO : offer to create on instead here...?
-				err = errors.New("FATAL ERROR: please provide the name of a database containing your acronyms\nrun 'amt --help' for more assistance\n")
+				// no database found - return with an error
+				err = errors.New("WARNING: no database containing your acronyms can be found...\n")
 				return err
 			}
 
@@ -144,6 +144,54 @@ func checkDB() (err error) {
 // is a global variable.
 //
 func openDB() (err error) {
+
+	if debugSwitch {
+		log.Printf("DEBUG: Attempting to open the database: '%s' ... ", dbName)
+	}
+
+	// open the database - or abort if fails. If successful get the
+	// handle to open database file as 'db' for any future SQL calls
+	db, err = sql.Open("sqlite3", dbName)
+	if err != nil {
+
+		if debugSwitch {
+			log.Printf("DEBUG: FAILED to open %s with error: %v - will exit application\n", dbName, err)
+			log.Println("DEBUG: Exit program with call to 'log.Fatal()'")
+		}
+
+		err = fmt.Errorf("FATAL ERROR: unable to get handle to SQLite database file: %s\nError is: %v\n", dbName, err)
+		return err
+	}
+
+	// check connection to database is ok
+	err = db.Ping()
+	if err != nil {
+		panic(err.Error())
+	}
+	fmt.Println("Database connection status:  √")
+
+	// display the SQLite database version we are comppiled with
+	fmt.Printf("SQLite3 Database Version:  %s\n", sqlVersion())
+	// obtain and display the current record count into global var for future use
+	recCount = checkCount()
+	fmt.Printf("Current record count is:  %s\n", humanize.Comma(recCount))
+	// display last acronym entered in the database for info
+	fmt.Printf("Last acronym entered was:  '%s'\n", lastAcronym())
+	// all ok - return no errors
+	return nil
+}
+
+// popNewDB function used to open the database and obtain initial
+// information confirming the connection is working, the acronym
+// record count in the database, and the last new acronym record
+// entered.
+//
+// The openDB function returns an error and error message to explain
+// the problem encountered, or 'nil' if no errors occured. The
+// function returns no oter information as the handle to the database
+// is a global variable.
+//
+func popNewDB() (err error) {
 
 	if debugSwitch {
 		log.Printf("DEBUG: Attempting to open the database: '%s' ... ", dbName)
