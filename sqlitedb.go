@@ -113,8 +113,8 @@ func checkDB() (err error) {
 		// check is a regular file
 		if mode.IsRegular() {
 			// print out some details of the database file:
-			fmt.Printf("Database: %s   permissions: %s   size: %s bytes\n\n",
-				fi.Name(), fi.Mode(), humanize.Comma(fi.Size()))
+			fmt.Printf("Database location: %s\nDatabase permissions: %s     Database size: %s bytes\n\n",
+				filepath.Join(filepath.Dir(dbName), fi.Name()), fi.Mode(), humanize.Comma(fi.Size()))
 
 			if debugSwitch {
 				log.Println("DEBUG: regular file check completed ok - return to main()")

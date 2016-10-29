@@ -20,7 +20,7 @@ import (
 // SET GLOBAL VARIABLES
 
 // set the version of the app here prep var to hold app name
-var appversion = "0.5.5"
+var appversion = "0.5.6"
 var appname string
 
 // flag() variables used for command line args
