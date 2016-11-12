@@ -33,7 +33,7 @@ void checkDB(void)
 {
 
     /* check if acronyms database file was supplied on the command line */
-
+	
     /* if ( ! dbfile = "") */
     /* { */
 
@@ -51,6 +51,7 @@ void checkDB(void)
                     " is missing or is not accessible\n\n", dbfile);
             exit(EXIT_FAILURE);
         }
+		
     } else {
         printf("\tWARNING: No database specified using 'ACRODB' environment variable\n");
         exit(EXIT_FAILURE);

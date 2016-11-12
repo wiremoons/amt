@@ -15,11 +15,10 @@
  * Program to access a SQLite database and look up a requested acronym that maybe
  * held in a table called 'ACRONYMS'.
  * 
- * Also shall allow the creation of new acronym records, alterations of existing,
+ * Also supports the creation of new acronym records, alterations of existing,
  * and deletion of records no longer required.
  * 
  * created: 20 Jan 2016 - version: 0.1 written - initial outline code written
- * 
  * 
  * The application uses the SQLite amalgamation source code files, so ensure they
  * are included in the same directory as this programs source code and then

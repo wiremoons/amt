@@ -20,7 +20,7 @@ int main(int argc, char **argv)
     /* Print application startup banner to the screen */
     printstart();
 
-    // Check it it was just help output the user requested?
+    // Check if help output was requested?
     if (help)
     {
         if (debug) { printf("\nDEBUG: User request help output\n"); }

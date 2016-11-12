@@ -7,7 +7,7 @@
 #	Makefile for amt.c
 #
 ## CHANGE xxxx FOR YOUR NEW SOURCE FILE NAME & OUTPUT FILE-NAME
-SRC=main.c
+SRC=main.c cli-args.c amt.c sqlite3.c
 OUTNAME=amt
 #
 #  NOTE:
