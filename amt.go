@@ -20,7 +20,7 @@ import (
 // SET GLOBAL VARIABLES
 
 // set the version of the app here prep var to hold app name
-var appversion = "0.5.6"
+var appversion = "0.5.7"
 var appname string
 
 // flag() variables used for command line args
@@ -79,7 +79,7 @@ func main() {
 		log.Println("\t\tDisplay additional debug output when run:", strconv.FormatBool(debugSwitch))
 		log.Println("\t\tDisplay additional help information:", strconv.FormatBool(helpMe))
 		log.Println("\t\tAdd a new acronym record:", strconv.FormatBool(addNew))
-		log.Println("\t\tShow the applications version:", strconv.FormatBool(addNew))
+		log.Println("\t\tShow the applications version:", strconv.FormatBool(showVer))
 	}
 
 	// a function that will run at the end of the program
