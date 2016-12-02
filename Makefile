@@ -6,8 +6,10 @@
 #
 #	Makefile for amt.c
 #
+#   gcc -Wall -std=gnu11 -m64 -g -o amt amt.c cli-args.c main.c sqlite3.c -Lpthread -ldl
+#
 ## CHANGE xxxx FOR YOUR NEW SOURCE FILE NAME & OUTPUT FILE-NAME
-SRC=main.c cli-args.c amt.c sqlite3.c
+SRC=amt.c cli-args.c main.c sqlite3.c
 OUTNAME=amt
 #
 #  NOTE:
@@ -93,12 +95,6 @@ LIBFLAGS=
 #	-lpdcurses					: includes PDCurses (Windows) library
 #	-lreadline					: inlcudes GNU Readline library support
 #
-## +++ OTHER SOURCE FLAGS: SRCINCL +++
-#
-#  Add below as needed to include other source code files with your compiled code:
-#
-SRCINCL=sqlite3.c amt.c cli-args.c
-#
 #
 ## +++ SET DEFAULTS FOR WINDOWS ENVIRONMENT +++
 RM = del
@@ -141,19 +137,19 @@ endif
 #
 ## +++ DEFAULT MAKE OUTPUT +++ :
 $(OUTNAME): $(SRC)
-	$(CC) $(CFLAGS) -o $(OUTNAME)$(EXE_END) $(SRC) $(SRCINCL) $(LIBFLAGS)
+	$(CC) $(CFLAGS) -o $(OUTNAME)$(EXE_END) $(SRC) $(LIBFLAGS)
 
 # if: 'make norm' use the other CFLAGS based on $ARCH defined
 norm: $(SRC)
-	$(CC) $(N-CFLAGS_$(ARCH)) -o $(OUTNAME)$(EXE_END) $(SRC) $(SRCINCL) $(LIBFLAGS)
+	$(CC) $(N-CFLAGS_$(ARCH)) -o $(OUTNAME)$(EXE_END) $(SRC) $(LIBFLAGS)
 
 # if: 'make opt' use the other CFLAGS based on $ARCH defined
 opt: $(SRC)
-	$(CC) $(OPT-CFLAGS_$(ARCH)) -o $(OUTNAME)$(EXE_END) $(SRC) $(SRCINCL) $(LIBFLAGS)
+	$(CC) $(OPT-CFLAGS_$(ARCH)) -o $(OUTNAME)$(EXE_END) $(SRC) $(LIBFLAGS)
 
 # if: 'make as' use to output an assembly source code version 
 as: $(SRC)
-	$(CC) -S -std=gnu11 -c $(SRC) $(SRCINCL) $(LIBFLAGS)
+	$(CC) -S -std=gnu11 -c $(SRC) $(LIBFLAGS)
 
 
 clean:
