@@ -12,7 +12,7 @@ int main(int argc, char **argv)
 
     /* use locale to format numbers output */
     setlocale(LC_NUMERIC, "");
-
+	
     // get any command line arguments provided by the user
     // and then process using getopts() via function below
     getCLIArgs(argc,argv);
@@ -46,6 +46,8 @@ int main(int argc, char **argv)
 
 
     /* perform db ops here */
+
+	/* program exit ok */
     return (EXIT_SUCCESS);
 }
 
