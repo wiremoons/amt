@@ -9,7 +9,7 @@
 #   gcc -Wall -std=gnu11 -m64 -g -o amt amt.c cli-args.c main.c sqlite3.c -Lpthread -ldl
 #
 ## CHANGE xxxx FOR YOUR NEW SOURCE FILE NAME & OUTPUT FILE-NAME
-SRC=amt.c cli-args.c main.c sqlite3.c
+SRC=amt-db-funcs.c cli-args.c main.c sqlite3.c
 OUTNAME=amt
 #
 #  NOTE:
