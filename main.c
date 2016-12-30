@@ -7,20 +7,20 @@
 int main(int argc, char **argv)
 {
 
-    // register our atexit() function
+    /* register our atexit() function */
     atexit(exitCleanup);
 
     /* use locale to format numbers output */
     setlocale(LC_NUMERIC, "");
 	
-    // get any command line arguments provided by the user
-    // and then process using getopts() via function below
+    /* get any command line arguments provided by the user and then
+       process using getopts() via function below */
     getCLIArgs(argc,argv);
 
     /* Print application startup banner to the screen */
     printstart();
 
-    // Check if help output was requested?
+    /* Check if help output was requested? */
     if (help)
     {
         if (debug) { printf("\nDEBUG: User request help output\n"); }
@@ -51,11 +51,11 @@ int main(int argc, char **argv)
     return (EXIT_SUCCESS);
 }
 
-/**-------- FUNCTION: exitCleanup
+/*
+** FUNCTION: exitCleanup
 **
-** function called when program exits
-** Used via registration with 'atexit()' in main()
-** run any final checks and db close down here
+** function called when program exits Used via registration with
+** 'atexit()' in main() run any final checks and db close down here
 **
 */
 void exitCleanup(void)
@@ -84,36 +84,37 @@ void exitCleanup(void)
     exit(EXIT_SUCCESS);
 }
 
-/**-------- FUNCTION: printstart
-*
-* Function to display basic information when application is started
-*
-*/
+
+/* FUNCTION: printstart */
+
+/* Function to display basic information when application is started */
+
+
 void printstart(void)
 {
     printf("\n");
     printf("\t\tAcronym Management Tool\n"
-            "\t\t¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯\n");
+		   "\t\t¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯\n");
     printf("Summary:\n"
-            " - App version: %s complied with SQLite version: %s\n",
-            appversion, SQLITE_VERSION);
+		   " - App version: %s complied with SQLite version: %s\n",
+		   appversion, SQLITE_VERSION);
 }
 
 /**-------- FUNCTION: showHelp
-** 
-** Show on screen a summary of the command line switches available in the
-** program.
-** 
-*/
+ ** 
+ ** Show on screen a summary of the command line switches available in the
+ ** program.
+ ** 
+ */
 void showHelp(void)
 {
     printf("\n"
-            "Help Summary:\n"
-            "The following command line switches can be used:\n\n"
-            "  -d\tDebug - include additional debug outputs when run\n"
-            "  -h\tHelp - Show this help information\n"
-            "  -v\tVersion - display the version of the program\n"
-            "  -n\tNew - add a new acronym record to the database\n"
-            "  -s ?\tSearch - find an acronym where ? == acronym to search for\n");
+		   "Help Summary:\n"
+		   "The following command line switches can be used:\n\n"
+		   "  -d\tDebug - include additional debug outputs when run\n"
+		   "  -h\tHelp - Show this help information\n"
+		   "  -v\tVersion - display the version of the program\n"
+		   "  -n\tNew - add a new acronym record to the database\n"
+		   "  -s ?\tSearch - find an acronym where ? == acronym to search for\n");
 }
 

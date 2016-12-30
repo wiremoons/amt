@@ -4,7 +4,7 @@
 #define AMT_H_ 
 
 #include <stdlib.h>     /* getenv */
-#include <stdio.h>      /* */
+#include <stdio.h>      /* printf */
 #include <unistd.h>     /* strdup access and FILE */
 
 
