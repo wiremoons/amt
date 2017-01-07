@@ -2,9 +2,12 @@
 
 #include "amt-db-funcs.h"
 
-#include <stdlib.h>     /* getenv */
-#include <stdio.h>      /* printf */
-#include <unistd.h>     /* strdup access and FILE */
+#include <stdlib.h> /* getenv */
+#include <stdio.h>  /* printf */
+#include <unistd.h> /* strdup access and FILE */
+#include <string.h> /* strlen strdup */
+#include <malloc.h> /* free for use with strdup */
+#include <locale.h> /* number output formatting with commas */
 
 /*
  * Run SQL query to obtain current number of acronyms in the database.
@@ -53,9 +56,67 @@ here */
 
 }
 
+
+/*
+ * Obtain the last acronym entered into the database
+ */
+char *get_last_acronym()
+{
+	char *acronym_name;
+	
+	rc = sqlite3_prepare_v2(db,"SELECT Acronym FROM acronyms Order by rowid DESC LIMIT 1;",-1, &stmt, NULL);
+	if ( rc != SQLITE_OK) {
+		fprintf(stderr,"SQL error: %s\n", sqlite3_errmsg(db));
+		exit(-1);
+	}
+
+	while(sqlite3_step(stmt) == SQLITE_ROW) {
+		acronym_name = strdup((const char*)sqlite3_column_text(stmt,0));
+	}
+
+	sqlite3_finalize(stmt);
+
+	if (acronym_name == NULL) {
+		fprintf(stderr,"ERROR: last acronym lookup return NULL\n");
+	}
+
+	return(acronym_name);
+}
+
+
+/*
+ * SEARCH FOR A NEW RECORD
+ * ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+ * select rowid,Acronym,Definition,Description,Source from ACRONYMS where Acronym like ? ORDER BY Source;
+ */
+
+/*
+ * DELETE A RECORD BASE ROWID
+ * ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+ * select rowid,Acronym,Definition,Description,Source from ACRONYMS where rowid = ?;
+ *
+ * delete from ACRONYMS where rowid = ?;
+ */
+
+/*
+ * CHECKING SQLITE VERSION
+ * ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+ * select SQLITE_VERSION();
+ */
+
+
+/*
+ * GETTING LIST OF ACRONYM SOURCES
+ * ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+ * select distinct(source) from acronyms;
+ */
+
+
 /*
  * ADDING NEW RECORD
  * ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+ * insert into ACRONYMS(Acronym, Definition, Description, Source) values(?,?,?,?)
+ * 
  * Note: To abort the input of a new record - press 'Ctrl + c'
  * 
  * Enter the new acronym: KSLOC

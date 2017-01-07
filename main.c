@@ -5,7 +5,7 @@
 #include <stdlib.h> /* getenv */
 #include <stdio.h>  /* printf */
 #include <unistd.h> /* strdup access */
-#include <string.h> /* strlen */
+#include <string.h> /* strlen strdup */
 #include <malloc.h> /* free for use with strdup */
 #include <locale.h> /* number output formatting with commas */
 
@@ -13,10 +13,15 @@ int main(int argc, char **argv)
 {
     atexit(exit_cleanup);
     setlocale(LC_NUMERIC, "");
+
+    char *prog_name=strdup(argv[0]);
+    if (prog_name == NULL) {
+	    fprintf(stderr,"ERROR: unable to set program name\n");
+    }
     
     get_cli_args(argc,argv);
 
-    print_start_screen();
+    print_start_screen(prog_name);
 
     if (help) {
         show_help();
@@ -32,7 +37,9 @@ int main(int argc, char **argv)
     }
 
     int totalrec = recCount();
-    printf(" - Record count is: %'d\n",totalrec);
+    printf(" - Current record count is: %'d\n",totalrec);
+    char *lastacro = get_last_acronym();
+    printf(" - Last acronym entered was: %s\n",lastacro);
 
     return (EXIT_SUCCESS);
 }
@@ -63,15 +70,15 @@ void exit_cleanup(void)
 }
 
 
-void print_start_screen(void)
+void print_start_screen(char *prog_name)
 {
     printf(
     "\n"
     "\t\tAcronym Management Tool\n"
     "\t\t¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯\n"
     "Summary:\n"
-    " - App version: %s complied with SQLite version: %s\n",
-    appversion, SQLITE_VERSION);
+    " - '%s' version is: %s complied with SQLite version: %s\n",
+    prog_name,appversion, SQLITE_VERSION);
 }
 
 
@@ -81,7 +88,6 @@ void show_help(void)
    "\n"
    "Help Summary:\n"
    "The following command line switches can be used:\n\n"
-   "  -d\tDebug - include additional debug outputs when run\n"
    "  -h\tHelp - Show this help information\n"
    "  -v\tVersion - display the version of the program\n"
    "  -n\tNew - add a new acronym record to the database\n"

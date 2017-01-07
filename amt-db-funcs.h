@@ -16,7 +16,8 @@ extern const char *data;
 *   FUNCTION DECLARATIONS
 */
 
-int recCount(void);	/* get current acronym record count */
-void check4DB(void);	/* ensure database is accessible */
+int recCount(void);	    /* get current acronym record count */
+void check4DB(void);	    /* ensure database is accessible */
+char *get_last_acronym();    /* get last acronym added to database */
 
 #endif // AMT_DB_FUNCS_H_ 
