@@ -38,9 +38,13 @@ int main(int argc, char **argv)
 
     int totalrec = recCount();
     printf(" - Current record count is: %'d\n",totalrec);
+
     char *lastacro = get_last_acronym();
     printf(" - Last acronym entered was: %s\n",lastacro);
-
+    if (lastacro != NULL ) {
+	    free(lastacro);
+    }
+    
     if ( findme != NULL ){
 	    int rec_match = 0;
 	    rec_match = do_acronym_search(findme);
@@ -68,10 +72,11 @@ void exit_cleanup(void)
     sqlite3_shutdown();
     printf("\nCompleted SQLite database shutdown\n\nAll is well\n");
 
+    /* free any global varables below */
     if (findme != NULL) {
 	    free(findme);
     }
-    
+
     exit(EXIT_SUCCESS);
 }
 
@@ -85,6 +90,12 @@ void print_start_screen(char *prog_name)
     "Summary:\n"
     " - '%s' version is: %s complied with SQLite version: %s\n",
     prog_name,appversion, SQLITE_VERSION);
+
+    /* done with this now */
+    if (prog_name != NULL) {
+	    free(prog_name);
+    }
+
 }
 
 
@@ -93,11 +104,12 @@ void show_help(void)
     printf(
    "\n"
    "Help Summary:\n"
-   "The following command line switches can be used:\n\n"
-   "  -d ?\tDelete - remove an acronym where ? == ID of record to delete\n"
-   "  -h\tHelp - Show this help information\n"
-   "  -n\tNew - add a new acronym record to the database\n"
-   "  -s ?\tSearch - find an acronym where ? == acronym to search for\n"
+   "The following command line switches can be used:\n"
+   "\n"
+   "  -d ?      Delete : remove an acronym where ? == ID of record to delete\n"
+   "  -h        Help   : show this help information\n"
+   "  -n        New    : add a new acronym record to the database\n"
+   "  -s ?      Search : find an acronym where ? == acronym to search for\n"
    );
 }
 
