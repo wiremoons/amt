@@ -10,7 +10,7 @@ extern char *findme;
 extern int newrec;
 extern int help;
 extern char appversion[];
-
+extern int recordid; 
 /*
  *   FUNCTION DECLARATIONS FOR cli-args.c
  */

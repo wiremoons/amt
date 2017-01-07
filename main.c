@@ -18,7 +18,7 @@ int main(int argc, char **argv)
     if (prog_name == NULL) {
 	    fprintf(stderr,"ERROR: unable to set program name\n");
     }
-    
+
     get_cli_args(argc,argv);
 
     print_start_screen(prog_name);
@@ -41,6 +41,12 @@ int main(int argc, char **argv)
     char *lastacro = get_last_acronym();
     printf(" - Last acronym entered was: %s\n",lastacro);
 
+    if ( findme != NULL ){
+	    int rec_match = 0;
+	    rec_match = do_acronym_search(findme);
+	    printf("\nDatabase search found '%'d' matching records\n",rec_match);
+    }
+    
     return (EXIT_SUCCESS);
 }
 
@@ -88,8 +94,8 @@ void show_help(void)
    "\n"
    "Help Summary:\n"
    "The following command line switches can be used:\n\n"
+   "  -d ?\tDelete - remove an acronym where ? == ID of record to delete\n"
    "  -h\tHelp - Show this help information\n"
-   "  -v\tVersion - display the version of the program\n"
    "  -n\tNew - add a new acronym record to the database\n"
    "  -s ?\tSearch - find an acronym where ? == acronym to search for\n"
    );
