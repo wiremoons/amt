@@ -35,7 +35,7 @@ N-CFLAGS_64=-m64 -flto -funroll-loops -Wall -std=gnu11
 OPT-CFLAGS_32=-m32 -mfpmath=sse -flto -march=native -funroll-loops -Wall -std=gnu11
 OPT-CFLAGS_64=-flto -funroll-loops -march=native -Wall -m64 -std=gnu11
 # add any LIBFLAGS
-LIBFLAGS=-lpthread -ldl
+LIBFLAGS=-lpthread -ldl -lreadline
 #
 ## +++ SET DEFAULTS FOR WINDOWS ENVIRONMENT +++
 RM = del

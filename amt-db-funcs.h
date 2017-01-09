@@ -3,8 +3,7 @@
 #ifndef AMT_DB_FUNCS_H_ /* Include guard */
 #define AMT_DB_FUNCS_H_ 
 
-
-#include "sqlite3.h"    /* SQLite header */
+#include "sqlite3.h"		/* SQLite header */
 
 extern char *dbfile;
 extern sqlite3 *db;
@@ -21,5 +20,6 @@ int recCount(void);			/* get current acronym record count */
 void check4DB(void);			/* ensure database is accessible */
 char *get_last_acronym();		/* get last acronym added to database */
 int do_acronym_search(char *findme);	/* search database for 'findme' string */
+int new_acronym(void);			/* add a new record enrty to the database */
 	
 #endif // AMT_DB_FUNCS_H_ 

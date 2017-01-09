@@ -50,6 +50,14 @@ int main(int argc, char **argv)
 	    rec_match = do_acronym_search(findme);
 	    printf("\nDatabase search found '%'d' matching records\n",rec_match);
     }
+
+    if (newrec){
+	    int add_worked = new_acronym();
+	    if (add_worked) {
+		    printf("DONE");
+	    }
+    }
+
     
     return (EXIT_SUCCESS);
 }

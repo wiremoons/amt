@@ -11,6 +11,8 @@
 #include <sys/types.h>		/* stat */
 #include <sys/stat.h>		/* stat */
 #include <time.h>		/* stat file modification time */
+#include <readline/readline.h>	/* readline support for text entry */
+#include <readline/history.h>	/* realine history support */
 
 /*
  * Run SQL query to obtain current number of acronyms in the database.
@@ -138,27 +140,6 @@ int do_acronym_search(char *findme)
 	return search_rec_count;
 }
 
-/*
- * DELETE A RECORD BASE ROWID
- * ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
- * select rowid,Acronym,Definition,Description,Source from ACRONYMS where rowid = ?;
- *
- * delete from ACRONYMS where rowid = ?;
- */
-
-/*
- * CHECKING SQLITE VERSION
- * ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
- * select SQLITE_VERSION();
- */
-
-
-/*
- * GETTING LIST OF ACRONYM SOURCES
- * ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
- * select distinct(source) from acronyms;
- */
-
 
 /*
  * ADDING NEW RECORD
@@ -182,3 +163,67 @@ int do_acronym_search(char *findme)
  * Continue? [y/n]: y
  * 1 records added to the database
  */ 
+
+int new_acronym(void)
+{
+	printf("\nAdding a new record...\n");
+	printf("\nNote: To abort the input of a new record - press 'Ctrl + c'\n\n");
+
+	char *complete = NULL;
+	char *n_acro = NULL;
+	char *n_acro_expd = NULL;
+	char *n_acro_desc = NULL;
+	char *n_acro_src = NULL;
+	
+	while (1) {
+		n_acro = readline("  Enter the acronym: ");
+		add_history(n_acro);
+		n_acro_expd = readline("  Enter the expanded acronym: ");
+		add_history(n_acro_expd);
+		n_acro_desc = readline("  Enter the acronym description: ");
+		add_history(n_acro_desc);
+		n_acro_src = readline("  Enter the acronym source: ");
+		add_history(n_acro_src);
+
+		printf("\nConfirm entry for:\n\n");
+		printf("ACRONYM:     '%s' is: %s.\n", n_acro, n_acro_expd);
+		printf("DESCRIPTION: %s\n", n_acro_desc);
+		printf("SOURCE:      %s\n\n",n_acro_src);
+
+		complete = readline("Enter record? [ y/n ] : ");
+		if ( strcasecmp((const char*)complete,"y") == 0 ){
+			break;
+		}
+	}
+
+	/* free up any allocated memory by readline */
+	if(n_acro != NULL) { free(n_acro); }
+	if(n_acro_expd != NULL) { free(n_acro_expd); }
+	if(n_acro_desc != NULL) { free(n_acro_desc); }
+	if(n_acro_src != NULL) { free(n_acro_src); }
+
+	return 0;
+}
+
+/*
+ * DELETE A RECORD BASE ROWID
+ * ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+ * select rowid,Acronym,Definition,Description,Source from ACRONYMS where rowid = ?;
+ *
+ * delete from ACRONYMS where rowid = ?;
+ */
+
+/*
+ * CHECKING SQLITE VERSION
+ * ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+ * select SQLITE_VERSION();
+ */
+
+
+/*
+ * GETTING LIST OF ACRONYM SOURCES
+ * ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+ * select distinct(source) from acronyms;
+ */
+
+
