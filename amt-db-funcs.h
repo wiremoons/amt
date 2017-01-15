@@ -22,4 +22,5 @@ char *get_last_acronym();		/* get last acronym added to database */
 int do_acronym_search(char *findme);	/* search database for 'findme' string */
 int new_acronym(void);			/* add a new record enrty to the database */
 char *get_acro_src(void);		/* get a list of acronym sources */	
+int del_acro_rec(int recordid);		/* delete a acronym record */
 #endif // AMT_DB_FUNCS_H_ 

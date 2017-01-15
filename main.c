@@ -40,24 +40,33 @@ int main(int argc, char **argv)
     printf(" - Current record count is: %'d\n",totalrec);
 
     char *lastacro = get_last_acronym();
-    printf(" - Last acronym entered was: %s\n",lastacro);
+    printf(" - Newest acronym is: %s\n",lastacro);
     if (lastacro != NULL ) {
 	    free(lastacro);
     }
-    
-    if ( findme != NULL ){
+
+    /* perform a database acronym search */
+    if ( findme != NULL ) {
 	    int rec_match = 0;
 	    rec_match = do_acronym_search(findme);
 	    printf("\nDatabase search found '%'d' matching records\n",rec_match);
     }
 
-    if (newrec){
+    /* add a new acronym record */
+    if (newrec) {
 	    int add_worked = new_acronym();
 	    if (add_worked) {
-		    printf("DONE");
+		    printf("\nADD DONE");
 	    }
     }
 
+    /* delete an acronym record */
+    if (recordid >= 0 ) {
+	    int del_worked = del_acro_rec(recordid);
+	    if (del_worked) {
+		    printf("\nDELETE DONE");
+	    }
+    }
     
     return (EXIT_SUCCESS);
 }

@@ -21,12 +21,14 @@ void get_cli_args(int argc, char **argv)
     while ((c = getopt (argc, argv, "d:hns:")) != -1) {
         switch (c) {
         case 'd':
-                recordid = *optarg;
-                if ( recordid < 0 || !isdigit(recordid) ) {
+		if ( !optarg || !isdigit(*optarg) ) {
                     fprintf(stderr,"\nERROR: for -d option please provide "
-                            "an acronym ID for removal. Use search function to locate correct 'ID' first\n");
+                            "an acronym ID for removal.\nUse search function to "
+			    "locate correct record 'ID' first, as the provided "
+			    "argument '%s' is not valid.\n",optarg?optarg:"");
                     exit(EXIT_FAILURE);
                 }
+		recordid = atoi(optarg);
                 break;
         case 'h':
 		help = 1;
