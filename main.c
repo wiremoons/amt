@@ -36,7 +36,7 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }
 
-    int totalrec = recCount();
+    int totalrec = get_rec_count();
     printf(" - Current record count is: %'d\n",totalrec);
 
     char *lastacro = get_last_acronym();

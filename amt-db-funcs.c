@@ -17,10 +17,11 @@
 /*
  * Run SQL query to obtain current number of acronyms in the database.
  */
-int recCount(void)
+int get_rec_count(void)
 {
 	int totalrec = 0;
-	rc = sqlite3_prepare_v2(db,"select count(*) from ACRONYMS",-1, &stmt, NULL);
+	rc = sqlite3_prepare_v2(db,"select count(*) from ACRONYMS"
+				,-1,&stmt,NULL);
 	if ( rc != SQLITE_OK) {
 		exit(-1);
 	}
@@ -41,12 +42,12 @@ void check4DB(void)
 
 	dbfile = getenv("ACRODB");
 	if (dbfile) {
-		printf(" - Database location: %s\n", dbfile);
+		printf(" - Database location: %s\n",dbfile);
 
 		if (access(dbfile, F_OK | R_OK) == -1) {
 			fprintf(stderr,"\n\nERROR: The database file '%s'"
 				" is missing or is not accessible\n\n"
-				, dbfile);
+				,dbfile);
 			exit(EXIT_FAILURE);
 		}
 
@@ -77,15 +78,19 @@ void check4DB(void)
 
 
 /*
- * Obtain the last acronym entered into the database
+ * GET NAME OF LAST ACRONYM ENTERED
+ * ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+ * SELECT Acronym FROM acronyms Order by rowid DESC LIMIT 1;
+ * 
  */
 char *get_last_acronym()
 {
 	char *acronym_name;
 	
-	rc = sqlite3_prepare_v2(db,"SELECT Acronym FROM acronyms Order by rowid DESC LIMIT 1;",-1, &stmt, NULL);
+	rc = sqlite3_prepare_v2(db,"SELECT Acronym FROM acronyms Order by rowid DESC LIMIT 1;"
+				,-1,&stmt,NULL);
 	if ( rc != SQLITE_OK) {
-		fprintf(stderr,"SQL error: %s\n", sqlite3_errmsg(db));
+		fprintf(stderr,"SQL error: %s\n",sqlite3_errmsg(db));
 		exit(-1);
 	}
 
@@ -106,32 +111,42 @@ char *get_last_acronym()
 /*
  * SEARCH FOR A NEW RECORD
  * ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
- * select rowid,Acronym,Definition,Description,Source from ACRONYMS where Acronym like ? ORDER BY Source;
+ * select rowid,Acronym,Definition,
+ * Description,Source from ACRONYMS
+ * where Acronym like ? COLLATE NOCASE ORDER BY Source;
+ * 
  */
 
 int do_acronym_search(char *findme)
 {
-	printf("\nSearchning for: '%s' in database...\n\n",findme);
+	printf("\nSearching for: '%s' in database...\n\n",findme);
 
-	rc = sqlite3_prepare_v2(db,"select rowid,Acronym,Definition,Description,Source from ACRONYMS where Acronym like ? ORDER BY Source;",-1, &stmt, NULL);
+	rc = sqlite3_prepare_v2(db,"select rowid,Acronym,Definition,Description,"
+				"Source from ACRONYMS where Acronym like ? "
+				"COLLATE NOCASE ORDER BY Source;"
+				,-1,&stmt,NULL);
 	if ( rc != SQLITE_OK) {
-		fprintf(stderr,"SQL error: %s\n", sqlite3_errmsg(db));
+		fprintf(stderr,"SQL error: %s\n",sqlite3_errmsg(db));
 		exit(EXIT_FAILURE);
 	}
 
 	sqlite3_bind_text(stmt,1,(const char*)findme,-1,SQLITE_STATIC);
 	if ( rc != SQLITE_OK) {
-		fprintf(stderr,"SQL error: %s\n", sqlite3_errmsg(db));
+		fprintf(stderr,"SQL error: %s\n",sqlite3_errmsg(db));
 		exit(EXIT_FAILURE);
 	}
 
 	int search_rec_count = 0;
 	while(sqlite3_step(stmt) == SQLITE_ROW) {
-		printf("ID:          %s\n", (const char*)sqlite3_column_text(stmt,0));
-		printf("ACRONYM:     '%s' is: %s.\n", (const char*)sqlite3_column_text(stmt,1),(const char*)sqlite3_column_text(stmt,2));
-		/* printf("DEFINITION:  %s\n", (const char*)sqlite3_column_text(stmt,2)); */
-		printf("DESCRIPTION: %s\n", (const char*)sqlite3_column_text(stmt,3));
-		printf("SOURCE:      %s\n\n", (const char*)sqlite3_column_text(stmt,4));
+		printf("ID:          %s\n"
+		       ,(const char*)sqlite3_column_text(stmt,0));
+		printf("ACRONYM:     '%s' is: %s.\n"
+		       ,(const char*)sqlite3_column_text(stmt,1)
+		       ,(const char*)sqlite3_column_text(stmt,2));
+		printf("DESCRIPTION: %s\n"
+		       ,(const char*)sqlite3_column_text(stmt,3));
+		printf("SOURCE:      %s\n\n"
+		       ,(const char*)sqlite3_column_text(stmt,4));
 		search_rec_count++;
 	}
 
@@ -142,30 +157,16 @@ int do_acronym_search(char *findme)
 
 
 /*
- * ADDING NEW RECORD
- * ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
- * insert into ACRONYMS(Acronym, Definition, Description, Source) values(?,?,?,?)
+ * ADDING A NEW RECORD
+ * ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
+ * insert into ACRONYMS(Acronym,Definition,Description,Source) values(?,?,?,?);
  * 
- * Note: To abort the input of a new record - press 'Ctrl + c'
- * 
- * Enter the new acronym: KSLOC
- * Enter the expanded version of the new acronym: Thousands of Source Line Of Code
- *     Enter any description for the new acronym: The count in thousand of line of
- *     source code that makes up an application, lines of code excluding blank lines
- *     and coments.
- * Enter any source for the new acronym: General ICT
- * Continue to add new acronym:
- * 	ACRONYM: KSLOC
- * 	EXPANDED: Thousands of Source Line Of Code
- * 	DESCRIPTION: The count in thousand of line of source code that makes up an
- * 	application, lines of code excluding blank lines and comments.
- * SOURCE: General ICT
- * Continue? [y/n]: y
- * 1 records added to the database
  */ 
 
 int new_acronym(void)
 {
+	int old_rec_cnt = get_rec_count();
+
 	printf("\nAdding a new record...\n");
 	printf("\nNote: To abort the input of a new record - press 'Ctrl + c'\n\n");
 
@@ -186,7 +187,7 @@ int new_acronym(void)
 		add_history(n_acro_src);
 
 		printf("\nConfirm entry for:\n\n");
-		printf("ACRONYM:     '%s' is: %s.\n", n_acro, n_acro_expd);
+		printf("ACRONYM:     '%s' is: %s.\n",n_acro, n_acro_expd);
 		printf("DESCRIPTION: %s\n", n_acro_desc);
 		printf("SOURCE:      %s\n\n",n_acro_src);
 
@@ -196,11 +197,37 @@ int new_acronym(void)
 		}
 	}
 
+
+	char *sql_ins = NULL;
+	sql_ins = sqlite3_mprintf("insert into ACRONYMS(Acronym, Definition, Description, Source) values(%Q,%Q,%Q,%Q);",n_acro,n_acro_expd,n_acro_desc,n_acro_src);
+		
+	rc = sqlite3_prepare_v2(db,sql_ins,-1,&stmt,NULL);
+	if ( rc != SQLITE_OK) {
+		fprintf(stderr,"SQL error: %s\n",sqlite3_errmsg(db));
+		exit(EXIT_FAILURE);
+	}
+
+	rc = sqlite3_exec(db,sql_ins,NULL,NULL,NULL);
+	if ( rc != SQLITE_OK) {
+		fprintf(stderr,"SQL error: %s\n",sqlite3_errmsg(db));
+		exit(EXIT_FAILURE);
+	}
+	
+	sqlite3_finalize(stmt);
+	
+	/* free up any allocated memory by sqlite3 */
+	if(sql_ins !=NULL) { sqlite3_free(sql_ins); }
+
 	/* free up any allocated memory by readline */
 	if(n_acro != NULL) { free(n_acro); }
 	if(n_acro_expd != NULL) { free(n_acro_expd); }
 	if(n_acro_desc != NULL) { free(n_acro_desc); }
 	if(n_acro_src != NULL) { free(n_acro_src); }
+
+	int new_rec_cnt = get_rec_count();
+	printf("Inserted '%d' new record. Total database record count is now"
+	       " %'d (was %'d).\n"
+	       ,(new_rec_cnt - old_rec_cnt),new_rec_cnt,old_rec_cnt);
 
 	return 0;
 }
@@ -211,6 +238,7 @@ int new_acronym(void)
  * select rowid,Acronym,Definition,Description,Source from ACRONYMS where rowid = ?;
  *
  * delete from ACRONYMS where rowid = ?;
+ * 
  */
 
 /*
@@ -226,4 +254,8 @@ int new_acronym(void)
  * select distinct(source) from acronyms;
  */
 
-
+char *get_acro_src(void)
+{
+	
+	
+}
