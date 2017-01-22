@@ -94,3 +94,7 @@ val:
 # used by Emacs for 'flymake'
 check-syntax:
 	gcc -o nul -S ${CHK_SOURCES}
+
+# Mingw cross compile from Linux
+win64:
+	x86_64-w64-mingw32-gcc -g -Wall -m64 -pg -std=gnu11 -o amt.exe amt-db-funcs.c cli-args.c main.c sqlite3.c -lpthread -lreadline -ltermcap -static
