@@ -180,13 +180,13 @@ int new_acronym(void)
 	char *n_acro_src = NULL;
 	
 	while (1) {
-		n_acro = readline("  Enter the acronym: ");
+		n_acro = readline("Enter the acronym: ");
 		add_history(n_acro);
-		n_acro_expd = readline("  Enter the expanded acronym: ");
+		n_acro_expd = readline("Enter the expanded acronym: ");
 		add_history(n_acro_expd);
-		n_acro_desc = readline("  Enter the acronym description: ");
+		n_acro_desc = readline("Enter the acronym description: \n\n");
 		add_history(n_acro_desc);
-		n_acro_src = readline("  Enter the acronym source: ");
+		n_acro_src = readline("\nEnter the acronym source: ");
 		add_history(n_acro_src);
 
 		printf("\nConfirm entry for:\n\n");
