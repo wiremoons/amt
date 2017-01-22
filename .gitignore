@@ -12,3 +12,4 @@ amt.exe
 # ignore cscope and ctags databases
 cscope.out
 tags
+.tags
