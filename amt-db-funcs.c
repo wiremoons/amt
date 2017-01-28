@@ -334,6 +334,19 @@ int del_acro_rec(int recordid)
 
 char *get_acro_src(void)
 {
+	rc = sqlite3_prepare_v2(db,"select distinct(source) from acronyms;"
+				,-1,&stmt,NULL);
+
+	if ( rc != SQLITE_OK) {
+		exit(-1);
+	}
+
+	while(sqlite3_step(stmt) == SQLITE_ROW) {
+		totalrec = sqlite3_column_int(stmt,0);
+	}
+
+	sqlite3_finalize(stmt);
 	
+	return(totalrec);	
 	
 }
