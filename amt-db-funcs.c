@@ -40,7 +40,6 @@ int get_rec_count(void)
  */
 void check4DB(void)
 {
-
 	dbfile = getenv("ACRODB");
 	if (dbfile) {
 		printf(" - Database location: %s\n",dbfile);
@@ -169,7 +168,8 @@ int do_acronym_search(char *findme)
 int new_acronym(void)
 {
 	int old_rec_cnt = get_rec_count();
-
+	char *source_list = get_acro_src();
+	
 	printf("\nAdding a new record...\n");
 	printf("\nNote: To abort the input of a new record - press 'Ctrl + c'\n\n");
 
@@ -186,6 +186,9 @@ int new_acronym(void)
 		add_history(n_acro_expd);
 		n_acro_desc = readline("Enter the acronym description: \n\n");
 		add_history(n_acro_desc);
+
+		printf("\n%s\n",source_list);
+		
 		n_acro_src = readline("\nEnter the acronym source: ");
 		add_history(n_acro_src);
 
@@ -194,10 +197,15 @@ int new_acronym(void)
 		printf("DESCRIPTION: %s\n", n_acro_desc);
 		printf("SOURCE:      %s\n\n",n_acro_src);
 
-		complete = readline("Enter record? [ y/n ] : ");
+		complete = readline("Enter record? [ y/n or q ] : ");
 		if ( strcasecmp((const char*)complete,"y") == 0 ){
 			break;
 		}
+		if ( strcasecmp((const char*)complete,"q") == 0 ){
+			/* clean up memory allocations here */
+			exit(EXIT_FAILURE);
+		}
+
 	}
 
 
@@ -250,6 +258,8 @@ int del_acro_rec(int recordid)
 {
 	int old_rec_cnt = get_rec_count();
 
+
+	
 	printf("\nDeleting an acronym record...\n");
 	printf("\nNote: To abort the delete of a record - press 'Ctrl + c'\n\n");
 
@@ -279,7 +289,7 @@ int del_acro_rec(int recordid)
 		       ,(const char*)sqlite3_column_text(stmt,2));
 		printf("DESCRIPTION: %s\n"
 		       ,(const char*)sqlite3_column_text(stmt,3));
-		printf("SOURCE:      %s\n\n"
+		printf("SOURCE: %s\n"
 		       ,(const char*)sqlite3_column_text(stmt,4));
 		delete_rec_count++;
 	}
@@ -288,7 +298,7 @@ int del_acro_rec(int recordid)
 
 	if ( delete_rec_count > 0 ) {
 		char *cont_del = NULL;
-		cont_del = readline("Delete above record? [ y/n ] : ");
+		cont_del = readline("\nDelete above record? [ y/n ] : ");
 		if ( strcasecmp((const char*)cont_del,"y") == 0 ) {
 		
 			rc = sqlite3_prepare_v2(db,"delete from ACRONYMS where "
@@ -342,11 +352,12 @@ char *get_acro_src(void)
 	}
 
 	while(sqlite3_step(stmt) == SQLITE_ROW) {
-		totalrec = sqlite3_column_int(stmt,0);
+		printf("%s\n",sqlite3_column_text(stmt,0));
 	}
 
 	sqlite3_finalize(stmt);
-	
-	return(totalrec);	
+
+	char *returnme = "done";
+	return(returnme);	
 	
 }
