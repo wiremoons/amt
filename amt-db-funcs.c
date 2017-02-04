@@ -83,7 +83,7 @@ void check4DB(void)
  * SELECT Acronym FROM acronyms Order by rowid DESC LIMIT 1;
  * 
  */
-char *get_last_acronym()
+char *get_last_acronym(void)
 {
 	char *acronym_name;
 	
