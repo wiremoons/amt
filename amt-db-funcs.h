@@ -18,7 +18,7 @@ extern char *findme;
 
 int get_rec_count(void);		/* get current acronym record count */
 void check4DB(void);			/* ensure database is accessible */
-char *get_last_acronym();		/* get last acronym added to database */
+char *get_last_acronym(void);		/* get last acronym added to database */
 int do_acronym_search(char *findme);	/* search database for 'findme' string */
 int new_acronym(void);			/* add a new record enrty to the database */
 char *get_acro_src(void);		/* get a list of acronym sources */	
