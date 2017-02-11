@@ -202,7 +202,23 @@ int new_acronym(void)
                         break;
                 }
                 if (strcasecmp((const char *)complete, "q") == 0) {
-                        /* clean up memory allocations here */
+                        /* Clean up readline allocated memory */
+                        if (complete != NULL) {
+                                free(complete);
+                        }
+                        if (n_acro != NULL) {
+                                free(n_acro);
+                        }
+                        if (n_acro_expd != NULL) {
+                                free(n_acro_expd);
+                        }
+                        if (n_acro_desc != NULL) {
+                                free(n_acro_desc);
+                        }
+                        if (n_acro_src != NULL) {
+                                free(n_acro_src);
+                        }
+                        rl_clear_history();
                         exit(EXIT_FAILURE);
                 }
         }
@@ -216,12 +232,46 @@ int new_acronym(void)
         rc = sqlite3_prepare_v2(db, sql_ins, -1, &stmt, NULL);
         if (rc != SQLITE_OK) {
                 fprintf(stderr, "SQL prepare error: %s\n", sqlite3_errmsg(db));
+                /* Clean up readline allocated memory */
+                if (complete != NULL) {
+                        free(complete);
+                }
+                if (n_acro != NULL) {
+                        free(n_acro);
+                }
+                if (n_acro_expd != NULL) {
+                        free(n_acro_expd);
+                }
+                if (n_acro_desc != NULL) {
+                        free(n_acro_desc);
+                }
+                if (n_acro_src != NULL) {
+                        free(n_acro_src);
+                }
+                rl_clear_history();
                 exit(EXIT_FAILURE);
         }
 
         rc = sqlite3_exec(db, sql_ins, NULL, NULL, NULL);
         if (rc != SQLITE_OK) {
                 fprintf(stderr, "SQL exec error: %s\n", sqlite3_errmsg(db));
+                /* Clean up readline allocated memory */
+                if (complete != NULL) {
+                        free(complete);
+                }
+                if (n_acro != NULL) {
+                        free(n_acro);
+                }
+                if (n_acro_expd != NULL) {
+                        free(n_acro_expd);
+                }
+                if (n_acro_desc != NULL) {
+                        free(n_acro_desc);
+                }
+                if (n_acro_src != NULL) {
+                        free(n_acro_src);
+                }
+                rl_clear_history();
                 exit(EXIT_FAILURE);
         }
 
@@ -232,7 +282,10 @@ int new_acronym(void)
                 sqlite3_free(sql_ins);
         }
 
-        /* free up any allocated memory by readline */
+        /* Clean up readline allocated memory */
+        if (complete != NULL) {
+                free(complete);
+        }
         if (n_acro != NULL) {
                 free(n_acro);
         }
@@ -245,6 +298,7 @@ int new_acronym(void)
         if (n_acro_src != NULL) {
                 free(n_acro_src);
         }
+        rl_clear_history();
 
         int new_rec_cnt = get_rec_count();
         printf("Inserted '%d' new record. Total database record count is now"
@@ -316,6 +370,9 @@ int del_acro_rec(int recordid)
                         if (rc != SQLITE_OK) {
                                 fprintf(stderr, "SQL prepare error: %s\n",
                                         sqlite3_errmsg(db));
+                                if (cont_del != NULL) {
+                                        free(cont_del);
+                                }
                                 exit(EXIT_FAILURE);
                         }
 
@@ -323,6 +380,9 @@ int del_acro_rec(int recordid)
                         if (rc != SQLITE_OK) {
                                 fprintf(stderr, "SQL bind error: %s\n",
                                         sqlite3_errmsg(db));
+                                if (cont_del != NULL) {
+                                        free(cont_del);
+                                }
                                 exit(EXIT_FAILURE);
                         }
 
@@ -330,9 +390,16 @@ int del_acro_rec(int recordid)
                         if (rc != SQLITE_DONE) {
                                 fprintf(stderr, "SQL step error: %s\n",
                                         sqlite3_errmsg(db));
+                                if (cont_del != NULL) {
+                                        free(cont_del);
+                                }
                                 exit(EXIT_FAILURE);
                         }
 
+                        /* free readline memory allocated */
+                        if (cont_del != NULL) {
+                                free(cont_del);
+                        }
                         sqlite3_finalize(stmt);
                 }
         } else {
@@ -355,22 +422,29 @@ int del_acro_rec(int recordid)
 
 void get_acro_src(void)
 {
-
         rc = sqlite3_prepare_v2(db, "select distinct(source) from acronyms;",
                                 -1, &stmt, NULL);
 
         if (rc != SQLITE_OK) {
                 exit(-1);
         }
+
         char *acro_src_name;
+
         printf("\nSelect a source (use ↑ or ↓ ):\n\n");
+
         while (sqlite3_step(stmt) == SQLITE_ROW) {
                 acro_src_name =
                     strdup((const char *)sqlite3_column_text(stmt, 0));
                 printf("[ %s ] ", acro_src_name);
                 add_history(acro_src_name);
+
+                /* free per loop to stop memory leaks - strdup malloc above */
+                if (acro_src_name != NULL) {
+                        free(acro_src_name);
+                }
         }
         printf("\n");
+
         sqlite3_finalize(stmt);
-        free(acro_src_name);
 }
