@@ -362,12 +362,15 @@ void get_acro_src(void)
         if (rc != SQLITE_OK) {
                 exit(-1);
         }
-
-        printf("\nSelect a source:\n\n");
+        char *acro_src_name;
+        printf("\nSelect a source (use ↑ or ↓ ):\n\n");
         while (sqlite3_step(stmt) == SQLITE_ROW) {
-
-                printf("[ %s ] ", sqlite3_column_text(stmt, 0));
+                acro_src_name =
+                    strdup((const char *)sqlite3_column_text(stmt, 0));
+                printf("[ %s ] ", acro_src_name);
+                add_history(acro_src_name);
         }
         printf("\n");
         sqlite3_finalize(stmt);
+        free(acro_src_name);
 }
