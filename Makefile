@@ -6,7 +6,7 @@
 #
 #	Makefile for amt
 #
-#   gcc -Wall -std=gnu11 -m64 -g -o amt amt.c cli-args.c main.c sqlite3.c -Lpthread -ldl
+#   gcc -Wall -std=gnu11 -m64 -g -o amt amt-db-funcs.c cli-args.c main.c sqlite3.c -Lpthread -ldl
 #
 ## CHANGE BELOW TO SOURCE FILE NAMES & OUTPUT FILE-NAME
 SRC=amt-db-funcs.c cli-args.c main.c sqlite3.c
