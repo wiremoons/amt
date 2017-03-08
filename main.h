@@ -8,20 +8,19 @@
  * source:     https://github.com/wiremoons/amt
  *
  * Program to access a SQLite database and look up a requested acronym that
- * maybe
- * held in a table called 'ACRONYMS'.
+ * maybe held in a table called 'ACRONYMS'.
  *
  * Also supports the creation of new acronym records, alterations of existing,
  * and deletion of records no longer required.
  *
- * created: 20 Jan 2016 - version: 0.1 written - initial outline code written
+ * created: 20 Jan 2016 - initial outline code written
  *
  * The application uses the SQLite amalgamation source code files, so ensure
- * they
- * are included in the same directory as this programs source code and then
- * compile with:
+ * they are included in the same directory as this programs source code.
+ * To build the program, use the provided Makefile or compile with:
  *
- * gcc -Wall main.c cli-args.c amt.c sqlite3.c -o amt.exe
+ * gcc -Wall -std=gnu11 -m64 -g -o amt amt-db-funcs.c cli-args.c main.c
+ * sqlite3.c -Lpthread -ldl
  *
  */
 
@@ -38,16 +37,16 @@
  *   APPLICATION GLOBAL VARIABLES
  */
 
-char *dbfile = "";           /* path and name of acronyms database filename */
-sqlite3 *db = NULL;          /* handle to the database */
-int rc = 0;                  /* returned result codes from calling SQLite functions */
+char *dbfile = "";  /* path and name of acronyms database filename */
+sqlite3 *db = NULL; /* handle to the database */
+int rc = 0;         /* returned result codes from calling SQLite functions */
 const char *data = NULL;     /* data returned from SQL stmt run */
 sqlite3_stmt *stmt = NULL;   /* preprepared SQL query statement */
 char appversion[] = "0.4.4"; /* set the version of the app here */
-int help = 0;                /* control help outputs request 0 == off | 1 == on */
-char *findme = NULL;         /* string request on command line for acronym search */
-int recordid = -1;           /* database record id (rowid) used to delete records */
-int newrec = 0;              /* request to add a new record 0 == off | 1 == on */
+int help = 0;        /* control help outputs request 0 == off | 1 == on */
+char *findme = NULL; /* string request on command line for acronym search */
+int recordid = -1;   /* database record id (rowid) used to delete records */
+int newrec = 0;      /* request to add a new record 0 == off | 1 == on */
 
 /* FUNCTION DECLARATIONS FOR main.c */
 
