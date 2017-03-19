@@ -16,7 +16,7 @@ OUTNAME=amt
 CC=gcc
 # set default build to 32 bit
 ARCH=32
-# set default CFLAGS to CFLAGS_32 - will changed below as req!
+# set default CFLAGS to CFLAGS_32 - will changed below if required
 CFLAGS=$(CFLAGS_$(ARCH))
 # set default to add '.exe' to end of compiled output files  - will changed below as req!
 EXE_END=.exe
@@ -95,6 +95,6 @@ val:
 check-syntax:
 	gcc -o nul -S ${CHK_SOURCES}
 
-# Mingw cross compile from Linux
-win64:
+# Mingw cross compile from Linux to Windows 64 bit
+cross-win64:
 	x86_64-w64-mingw32-gcc -g -Wall -m64 -pg -std=gnu11 -o amt.exe amt-db-funcs.c cli-args.c main.c sqlite3.c -lpthread -lreadline -ltermcap -static
