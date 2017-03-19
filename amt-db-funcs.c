@@ -3,11 +3,12 @@
 #include "amt-db-funcs.h"
 
 #include <errno.h>             /* strerror */
+#include <libgen.h>            /* basename and dirname */
 #include <locale.h>            /* number output formatting with commas */
 #include <malloc.h>            /* free for use with strdup */
 #include <readline/history.h>  /* realine history support */
 #include <readline/readline.h> /* readline support for text entry */
-#include <stdio.h>             /* printf */
+#include <stdio.h>             /* printf and asprintf*/
 #include <stdlib.h>            /* getenv */
 #include <string.h>            /* strlen strdup */
 #include <sys/stat.h>          /* stat */
@@ -39,41 +40,110 @@ int get_rec_count(void)
 /*
  * Check for a valid database file to open
  */
-void check4DB(void)
+void check4DB(char *prog_name)
 {
+        bool run_ok;
+
+        /* get database file from environment variable ARCODB first */
         dbfile = getenv("ACRODB");
-        if (dbfile) {
-                printf(" - Database location: %s\n", dbfile);
-
-                if (access(dbfile, F_OK | R_OK) == -1) {
-                        fprintf(stderr, "\n\nERROR: The database file '%s'"
-                                        " is missing or is not accessible\n\n",
-                                dbfile);
-                        exit(EXIT_FAILURE);
+        /* if the environment variable exists - check if its valid */
+        if (dbfile != NULL) {
+                run_ok = check_db_access();
+                if (run_ok) {
+                        return;
                 }
+        }
 
-                struct stat sb;
-                int check;
+        /* nothing is set in environment variable ARCODB - so database might
+         * be found in the application directory instead */
 
-                check = stat(dbfile, &sb);
+        /* tmp copy needed here as each call to dirname() below can change the
+         * string being used in the call - so need one string copy for each
+         * successful call we need to make. This is a 'feature' of dirname() */
+        char *tmp_dirname = strdup(prog_name);
 
-                if (check) {
-                        perror("\nERROR: call to 'stat' for database file "
-                               "failed\n");
-                        exit(EXIT_FAILURE);
-                }
+        size_t new_dbfile_sz = (sizeof(char) * (strlen(dirname(tmp_dirname)) +
+                                                strlen("/acronyms.db") + 1));
 
-                printf(" - Database size: %'ld bytes\n", sb.st_size);
-                printf(" - Database last modified: %s\n", ctime(&sb.st_mtime));
-        } else {
-                printf("\tWARNING: No database specified using 'ACRODB' "
-                       "environment variable\n");
+        char *new_dbfile = malloc(new_dbfile_sz);
+
+        if (new_dbfile == NULL) {
+                perror("\nERROR: unable to allocate memory with "
+                       "malloc() for 'new_dbfile' and path\n");
                 exit(EXIT_FAILURE);
         }
 
-        /* TODO if neither of the above - check current directory we are
-   running in - or then offer to create a new db? otherwise exit prog
-   here */
+        int x = snprintf(new_dbfile, new_dbfile_sz, "%s%s", dirname(prog_name),
+                         "/acronyms.db");
+
+        if (x == -1) {
+                perror("\nERROR: unable to allocate memory with "
+                       "snprintf() for 'new_dbfile' and path\n");
+                exit(EXIT_FAILURE);
+        }
+
+        if ((dbfile = strdup(new_dbfile)) == NULL) {
+                perror("\nERROR: unable to allocate memory with "
+                       "strdup() for 'new_dbfile' to 'dbfile' copy\n");
+                exit(EXIT_FAILURE);
+        }
+
+        printf("\nnew_dbfile: '%s' and dbfile: '%s'\n", new_dbfile, dbfile);
+
+        if (new_dbfile != NULL) {
+                free(new_dbfile);
+        }
+
+        /* now recheck if the new_dbfile is suitable for use? */
+        run_ok = check_db_access();
+        if (run_ok) {
+                return;
+        }
+
+        /* run out of options to find a suitable database - exit */
+        printf("\n\tWARNING: No suitable database file can be located - "
+               "program will exit\n");
+        exit(EXIT_FAILURE);
+}
+
+/*
+ * Check the filename and path given for the acronym database and see if it is
+ * accessable. This file and patch is stored in the global variable: 'dbfile''
+ *
+ */
+bool check_db_access(void)
+{
+        if (dbfile == NULL || strlen(dbfile) == 0) {
+                fprintf(stderr, "ERROR: The database file '%s'"
+                                " is an empty string\n",
+                        dbfile);
+                return (false);
+        }
+
+        if (access(dbfile, F_OK | R_OK) == -1) {
+                fprintf(stderr, "ERROR: The database file '%s'"
+                                " is missing or is not accessible\n",
+                        dbfile);
+                return (false);
+        }
+
+        printf(" - Database location: %s\n", dbfile);
+
+        struct stat sb;
+        int check;
+
+        check = stat(dbfile, &sb);
+
+        if (check) {
+                perror("ERROR: call to 'stat' for database file "
+                       "failed\n");
+                return (false);
+        }
+
+        printf(" - Database size: %'ld bytes\n", sb.st_size);
+        printf(" - Database last modified: %s\n", ctime(&sb.st_mtime));
+
+        return (true);
 }
 
 /*
@@ -162,7 +232,8 @@ int do_acronym_search(char *findme)
 /*
  * ADDING A NEW RECORD
  * ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
- * insert into ACRONYMS(Acronym,Definition,Description,Source) values(?,?,?,?);
+ * insert into ACRONYMS(Acronym,Definition,Description,Source)
+ * values(?,?,?,?);
  *
  */
 
@@ -171,7 +242,8 @@ int new_acronym(void)
         int old_rec_cnt = get_rec_count();
 
         printf("\nAdding a new record...\n");
-        printf("\nNote: To abort the input of a new record - press 'Ctrl + "
+        printf("\nNote: To abort the input of a new record - press "
+               "'Ctrl + "
                "c'\n\n");
 
         char *complete = NULL;
@@ -301,7 +373,8 @@ int new_acronym(void)
         rl_clear_history();
 
         int new_rec_cnt = get_rec_count();
-        printf("Inserted '%d' new record. Total database record count is now"
+        printf("Inserted '%d' new record. Total database record count "
+               "is now"
                " %'d (was %'d).\n",
                (new_rec_cnt - old_rec_cnt), new_rec_cnt, old_rec_cnt);
 
@@ -311,7 +384,8 @@ int new_acronym(void)
 /*
  * DELETE A RECORD BASE ROWID
  * ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯
- * select rowid,Acronym,Definition,Description,Source from ACRONYMS where rowid
+ * select rowid,Acronym,Definition,Description,Source from ACRONYMS
+ * where rowid
  * = ?;
  *
  * delete from ACRONYMS where rowid = ?;
@@ -321,8 +395,8 @@ int del_acro_rec(int recordid)
 {
         int old_rec_cnt = get_rec_count();
         printf("\nDeleting an acronym record...\n");
-        printf(
-            "\nNote: To abort the delete of a record - press 'Ctrl + c'\n\n");
+        printf("\nNote: To abort the delete of a record - press 'Ctrl "
+               "+ c'\n\n");
 
         printf("\nSearching for record ID: '%d' in database...\n\n", recordid);
 
@@ -439,7 +513,8 @@ void get_acro_src(void)
                 printf("[ %s ] ", acro_src_name);
                 add_history(acro_src_name);
 
-                /* free per loop to stop memory leaks - strdup malloc above */
+                /* free per loop to stop memory leaks - strdup malloc
+                 * above */
                 if (acro_src_name != NULL) {
                         free(acro_src_name);
                 }
