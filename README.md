@@ -114,7 +114,6 @@ make opt
 ```
 
 
-
 ## Database Location
 
 By default the SQLite database used to store the acronyms can be located in the
@@ -176,17 +175,18 @@ GPL v3**, see https://www.gnu.org/licenses/ for more details.
 
 **PLEASE NOTE**: Any *distributed compiled binary* versions of `amt` will
 include GNU Readline functionality, and these specific binary versions will
-therefore be infected by the GPL license. In these circumstances, if the binary
-is onward distributed (ie shared with another party), it should be licensed as
-'GNU GPL v3'. For most users of other GPL licensed software (such as most GNU Linux
-distributions!), this will not be an issue.
+therefore be 'infected' by the GPL license. In these circumstances, if the
+binary is onward distributed (ie shared with another party), it should be
+licensed as 'GNU GPL v3'. For most users of other GPL licensed software (such as
+GNU Linux distributions), this will not be an issue or concern either.
 
 The `amt` source code remains completely free under a the **MIT License**
 however. This GNU GPL license *developer limitation of freedom* can be
-circumvented by perhaps using an alternative to then GNU Readline library, such
+circumvented by perhaps using an alternative to the GNU Readline library, such
 as:
 
 - [http://thrysoee.dk/editline/](EditLine) 
 - [https://github.com/antirez/linenoise](Linenoise)
 
 These two example alternative libraries are **not** GNU GPL licensed libraries.
+These options provide an alternative *choice*, should you want to invoke it.
