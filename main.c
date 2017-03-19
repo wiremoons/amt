@@ -30,7 +30,12 @@ int main(int argc, char **argv)
                 return EXIT_SUCCESS;
         }
 
-        check4DB();
+        check4DB(prog_name);
+
+        /* done with this now - used by: */
+        if (prog_name != NULL) {
+                free(prog_name);
+        }
 
         sqlite3_initialize();
         rc = sqlite3_open_v2(dbfile, &db,
@@ -99,7 +104,6 @@ void exit_cleanup(void)
         if (findme != NULL) {
                 free(findme);
         }
-
         exit(EXIT_SUCCESS);
 }
 
@@ -111,11 +115,6 @@ void print_start_screen(char *prog_name)
                "Summary:\n"
                " - '%s' version is: %s complied with SQLite version: %s\n",
                prog_name, appversion, SQLITE_VERSION);
-
-        /* done with this now */
-        if (prog_name != NULL) {
-                free(prog_name);
-        }
 }
 
 void show_help(void)

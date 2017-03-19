@@ -23,17 +23,17 @@ EXE_END=.exe
 #
 ## +++ BASELINE CFLAGS +++
 # 32 bit default is with debugging, warnings, and use GNU C11 standard
-CFLAGS_32=-g -Wall -m32 -pg -std=gnu11
+CFLAGS_32=-D_GNU_SOURCE -g -Wall -m32 -pg -std=gnu11
 # 64 bit default which provides same - but 64bit build instead
-CFLAGS_64=-g -Wall -m64 -pg -std=gnu11
+CFLAGS_64=-D_GNU_SOURCE -g -Wall -m64 -pg -std=gnu11
 #
 ## +++ OPTIMSED CFLAGS +++
 # normal optimisations for 32bit & 64bit - any computer
-N-CFLAGS_32=-m32 -mfpmath=sse -flto -funroll-loops -Wall -std=gnu11
-N-CFLAGS_64=-m64 -flto -funroll-loops -Wall -std=gnu11
+N-CFLAGS_32=-D_GNU_SOURCE -m32 -mfpmath=sse -flto -funroll-loops -Wall -std=gnu11
+N-CFLAGS_64=-D_GNU_SOURCE -m64 -flto -funroll-loops -Wall -std=gnu11
 # max optimisations for 32bit & 64bit - output only for computer compiled on!!
-OPT-CFLAGS_32=-m32 -mfpmath=sse -flto -march=native -funroll-loops -Wall -std=gnu11
-OPT-CFLAGS_64=-flto -funroll-loops -march=native -Wall -m64 -std=gnu11
+OPT-CFLAGS_32=-D_GNU_SOURCE -m32 -mfpmath=sse -flto -march=native -funroll-loops -Wall -std=gnu11
+OPT-CFLAGS_64=-D_GNU_SOURCE -flto -funroll-loops -march=native -Wall -m64 -std=gnu11
 # add any LIBFLAGS
 LIBFLAGS=-lpthread -ldl -lreadline
 #
