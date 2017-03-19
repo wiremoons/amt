@@ -85,7 +85,8 @@ The application uses GNU Readline, and requires these development libraries to
 be installed on the system that `amt` is being built on. On most Linux systems
 the Readline library can be installed from the distributions software
 repositories. The libraries will need to be available before `amt` will compile
-successfully.
+successfully. The GNU Readline library is used to provide some of the
+applications functionality during text entry.
 
 More information on GNU Readline Library can be found here:
 http://cnswww.cns.cwru.edu/php/chet/readline/readline.html
@@ -98,16 +99,21 @@ following commands before attempting to compile `amt`:
 - Ubuntu Linux: `sudo apt install build-essential libreadline6 libreadline6-dev`
 - Fedora (Workstation) Linux: `sudo dnf install readline-devel `
 
- on the GNU Readline library, that provides some of the functionality
-used in the application to edit acronyms during text entry, and recall
-previously entered text also.
+On Windows you can use a C compiler such as MinGW (or equivalent) to build the
+application. In order to build the Windows version for testing and personal use,
+this is done on Fedora Workstation as a cross compile.
+
+### Building 'amt'
+
+Before trying to build `amt` make sure you have the required dependencies install
+- see above for more information.
 
 An example command to compile `amt` with GCC compiler on a 64bit Linux system is shown below:
 ```
 gcc -g -Wall -m64 -std=gnu11 -o amt amt-db-funcs.c cli-args.c main.c sqlite3.c -lpthread -ldl -lreadline
 ```
 
-Alternatively, the program can be compiled using the provided 'Makefile'. For
+Alternatively, the program can be compiled using the provided '*Makefile*'. For
 example to compile a optimised (non debug) version of `amt`, run:
 ```
 make opt
