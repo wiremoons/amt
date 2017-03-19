@@ -4,6 +4,7 @@
 #define AMT_DB_FUNCS_H_
 
 #include "sqlite3.h" /* SQLite header */
+#include <stdbool.h> /* use of true / false booleans for declaration below*/
 
 extern char *dbfile;
 extern sqlite3 *db;
@@ -16,12 +17,13 @@ extern char *findme;
 *   FUNCTION DECLARATIONS
 */
 
-int get_rec_count(void);             /* get current acronym record count */
-void check4DB(void);                 /* ensure database is accessible */
-char *get_last_acronym(void);        /* get last acronym added to database */
+int get_rec_count(void);        /* get current acronym record count */
+void check4DB(char *prog_name); /* ensure database exists and is accessible */
+char *get_last_acronym(void);   /* get last acronym added to database */
 int do_acronym_search(char *findme); /* search database for 'findme' string */
 int new_acronym(void);          /* add a new record entry to the database */
 void get_acro_src(void);        /* get a list of acronym sources */
 int del_acro_rec(int recordid); /* delete a acronym record */
+bool check_db_access(void);     /* database file exists and can be accessed? */
 
 #endif // AMT_DB_FUNCS_H_
