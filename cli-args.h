@@ -1,8 +1,7 @@
 /* Acronym Management Tool (amt): cli-args.h */
 
 #ifndef CLI_ARGS_H_ /* Include guard */
-#define CLI_ARGS_H_ 
-
+#define CLI_ARGS_H_
 
 extern int argc;
 extern char **argv;
@@ -10,12 +9,12 @@ extern char *findme;
 extern int newrec;
 extern int help;
 extern char appversion[];
-extern int recordid; 
+extern int recordid;
+
 /*
  *   FUNCTION DECLARATIONS FOR cli-args.c
  */
 
 void get_cli_args(int argc, char **argv);
 
-#endif // AMT_H_ 
-
+#endif // AMT_H_
