@@ -5,7 +5,7 @@
 #include <errno.h>             /* strerror */
 #include <libgen.h>            /* basename and dirname */
 #include <locale.h>            /* number output formatting with commas */
-#include <malloc.h>            /* free for use with strdup */
+#include <malloc.h>            /* free for use with strdup and malloc */
 #include <readline/history.h>  /* realine history support */
 #include <readline/readline.h> /* readline support for text entry */
 #include <stdio.h>             /* printf and asprintf*/
@@ -26,7 +26,9 @@ int get_rec_count(void)
                                 NULL);
 
         if (rc != SQLITE_OK) {
-                exit(-1);
+                perror("\nERROR: unable to access the SQLite database to "
+                       "perform a record count\n");
+                exit(EXIT_FAILURE);
         }
 
         while (sqlite3_step(stmt) == SQLITE_ROW) {
