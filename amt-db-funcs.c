@@ -498,8 +498,9 @@ int del_acro_rec(int recordid)
 
 void get_acro_src(void)
 {
-        rc = sqlite3_prepare_v2(db, "select distinct(source) from acronyms;",
-                                -1, &stmt, NULL);
+        rc = sqlite3_prepare_v2(
+            db, "select distinct(source) from acronyms order by source;", -1,
+            &stmt, NULL);
 
         if (rc != SQLITE_OK) {
                 exit(-1);
