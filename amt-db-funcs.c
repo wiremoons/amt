@@ -16,8 +16,6 @@
 #include <time.h>              /* stat file modification time */
 #include <unistd.h>            /* strdup access stat and FILE */
 
-
-
 /***********************************************************************/
 /* Run SQL query to obtain current number of acronyms in the database. */
 /***********************************************************************/
@@ -40,8 +38,6 @@ int get_rec_count(void)
         sqlite3_finalize(stmt);
         return (totalrec);
 }
-
-
 
 /****************************************************************/
 /* Checks for a valid database filename to open looking at:     */
@@ -67,7 +63,8 @@ void check4DB(char *prog_name)
         /* might be found in the application directory instead, named */
         /* as the default filename: 'acronyms.db' */
 
-        /* tmp copy needed here as each call to dirname() below can change the */
+        /* tmp copy needed here as each call to dirname() below can change the
+         */
         /* string being used in the call - so need one string copy for each */
         /* successful call we need to make. This is a 'feature' of dirname() */
         char *tmp_dirname = strdup(prog_name);
@@ -122,7 +119,6 @@ void check4DB(char *prog_name)
         exit(EXIT_FAILURE);
 }
 
- 
 /**********************************************************************/
 /* Check the filename and path given for the acronym database and see */
 /* if it is accessable. If the file is located then print some stats  */
@@ -163,7 +159,6 @@ bool check_db_access(void)
         return (true);
 }
 
-
 /*************************************************************/
 /* GET NAME OF LAST ACRONYM ENTERED			     */
 /* ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯			     */
@@ -194,7 +189,6 @@ char *get_last_acronym(void)
 
         return (acronym_name);
 }
-
 
 /********************************************************/
 /* SEARCH FOR A NEW RECORD			        */
@@ -244,7 +238,6 @@ int do_acronym_search(char *findme)
 
         return search_rec_count;
 }
-
 
 /***************************************************************/
 /* ADDING A NEW RECORD					       */
@@ -396,7 +389,6 @@ int new_acronym(void)
         return 0;
 }
 
-
 /********************************************************************/
 /* DELETE A RECORD BASE ROWID					    */
 /* ¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯					    */
@@ -447,7 +439,7 @@ int del_acro_rec(int recordid)
 
         sqlite3_finalize(stmt);
 
-        if (delete_rec_count > 0) {
+        if (delete_rec_count == 1) {
                 char *cont_del = NULL;
                 cont_del = readline("\nDelete above record? [ y/n ] : ");
                 if (strcasecmp((const char *)cont_del, "y") == 0) {
@@ -490,9 +482,20 @@ int del_acro_rec(int recordid)
                                 free(cont_del);
                         }
                         sqlite3_finalize(stmt);
+                } else {
+                        printf(
+                            "\nRequest to delete record ID '%d' was abandoned "
+                            "by the user\n\n",
+                            recordid);
                 }
+        } else if (delete_rec_count > 1) {
+                printf(" » ERROR: record ID '%d' search returned '%d' records "
+                       "«\n\n",
+                       recordid, delete_rec_count);
         } else {
-                printf(" » no record ID: '%d' found «\n\n", recordid);
+                printf(" » WARNING: record ID '%d' found '%d' matching "
+                       "records «\n\n",
+                       recordid, delete_rec_count);
         }
 
         int new_rec_cnt = get_rec_count();
@@ -502,7 +505,6 @@ int del_acro_rec(int recordid)
 
         return delete_rec_count;
 }
-
 
 /******************************************/
 /* GETTING LIST OF ACRONYM SOURCES	  */
