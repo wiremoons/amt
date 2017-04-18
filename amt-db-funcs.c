@@ -398,14 +398,15 @@ int new_acronym(void)
 /* 								    */
 /* delete from ACRONYMS where rowid = ?;			    */
 /********************************************************************/
-int del_acro_rec(int recordid)
+int del_acro_rec(int del_rec_id)
 {
         int old_rec_cnt = get_rec_count();
         printf("\nDeleting an acronym record...\n");
         printf("\nNote: To abort the delete of a record - press 'Ctrl "
                "+ c'\n\n");
 
-        printf("\nSearching for record ID: '%d' in database...\n\n", recordid);
+        printf("\nSearching for record ID: '%d' in database...\n\n",
+               del_rec_id);
 
         rc = sqlite3_prepare_v2(db,
                                 "select rowid,Acronym,Definition,Description,"
@@ -417,7 +418,7 @@ int del_acro_rec(int recordid)
                 exit(EXIT_FAILURE);
         }
 
-        rc = sqlite3_bind_int(stmt, 1, recordid);
+        rc = sqlite3_bind_int(stmt, 1, del_rec_id);
         if (rc != SQLITE_OK) {
                 fprintf(stderr, "SQL bind error: %s\n", sqlite3_errmsg(db));
                 exit(EXIT_FAILURE);
@@ -457,7 +458,7 @@ int del_acro_rec(int recordid)
                                 exit(EXIT_FAILURE);
                         }
 
-                        rc = sqlite3_bind_int(stmt, 1, recordid);
+                        rc = sqlite3_bind_int(stmt, 1, del_rec_id);
                         if (rc != SQLITE_OK) {
                                 fprintf(stderr, "SQL bind error: %s\n",
                                         sqlite3_errmsg(db));
@@ -486,16 +487,16 @@ int del_acro_rec(int recordid)
                         printf(
                             "\nRequest to delete record ID '%d' was abandoned "
                             "by the user\n\n",
-                            recordid);
+                            del_rec_id);
                 }
         } else if (delete_rec_count > 1) {
                 printf(" » ERROR: record ID '%d' search returned '%d' records "
                        "«\n\n",
-                       recordid, delete_rec_count);
+                       del_rec_id, delete_rec_count);
         } else {
                 printf(" » WARNING: record ID '%d' found '%d' matching "
                        "records «\n\n",
-                       recordid, delete_rec_count);
+                       del_rec_id, delete_rec_count);
         }
 
         int new_rec_cnt = get_rec_count();
@@ -541,3 +542,125 @@ void get_acro_src(void)
 
         sqlite3_finalize(stmt);
 }
+
+// /********************************************************************/
+// /* UPDATE A RECORD BASED ON ROWID				    */
+// /* select rowid,Acronym,Definition,Description,Source from ACRONYMS */
+// /* where rowid							    */
+// /* = ?;								    */
+// /* 								    */
+// /* delete from ACRONYMS where rowid = ?;			    */
+// /********************************************************************/
+// int update_acro_rec(int update_rec_id)
+// {
+//         int old_rec_cnt = get_rec_count();
+//         printf("\nDeleting an acronym record...\n");
+//         printf("\nNote: To abort the delete of a record - press 'Ctrl "
+//                "+ c'\n\n");
+
+//         printf("\nSearching for record ID: '%d' in database...\n\n",
+//                update_rec_id);
+
+//         rc = sqlite3_prepare_v2(db,
+//                                 "select
+//                                 rowid,Acronym,Definition,Description,"
+//                                 "Source from ACRONYMS where rowid like ?;",
+//                                 -1, &stmt, NULL);
+
+//         if (rc != SQLITE_OK) {
+//                 fprintf(stderr, "SQL prepare error: %s\n",
+//                 sqlite3_errmsg(db));
+//                 exit(EXIT_FAILURE);
+//         }
+
+//         rc = sqlite3_bind_int(stmt, 1, update_rec_id);
+//         if (rc != SQLITE_OK) {
+//                 fprintf(stderr, "SQL bind error: %s\n", sqlite3_errmsg(db));
+//                 exit(EXIT_FAILURE);
+//         }
+
+//         int delete_rec_count = 0;
+//         while (sqlite3_step(stmt) == SQLITE_ROW) {
+//                 printf("ID:          %s\n",
+//                        (const char *)sqlite3_column_text(stmt, 0));
+//                 printf("ACRONYM:     '%s' is: %s.\n",
+//                        (const char *)sqlite3_column_text(stmt, 1),
+//                        (const char *)sqlite3_column_text(stmt, 2));
+//                 printf("DESCRIPTION: %s\n",
+//                        (const char *)sqlite3_column_text(stmt, 3));
+//                 printf("SOURCE: %s\n",
+//                        (const char *)sqlite3_column_text(stmt, 4));
+//                 delete_rec_count++;
+//         }
+
+//         sqlite3_finalize(stmt);
+
+//         if (delete_rec_count == 1) {
+//                 char *cont_del = NULL;
+//                 cont_del = readline("\nDelete above record? [ y/n ] : ");
+//                 if (strcasecmp((const char *)cont_del, "y") == 0) {
+
+//                         rc =
+//                             sqlite3_prepare_v2(db, "delete from ACRONYMS
+//                             where "
+//                                                    "rowid = ?;",
+//                                                -1, &stmt, NULL);
+//                         if (rc != SQLITE_OK) {
+//                                 fprintf(stderr, "SQL prepare error: %s\n",
+//                                         sqlite3_errmsg(db));
+//                                 if (cont_del != NULL) {
+//                                         free(cont_del);
+//                                 }
+//                                 exit(EXIT_FAILURE);
+//                         }
+
+//                         rc = sqlite3_bind_int(stmt, 1, update_rec_id);
+//                         if (rc != SQLITE_OK) {
+//                                 fprintf(stderr, "SQL bind error: %s\n",
+//                                         sqlite3_errmsg(db));
+//                                 if (cont_del != NULL) {
+//                                         free(cont_del);
+//                                 }
+//                                 exit(EXIT_FAILURE);
+//                         }
+
+//                         rc = sqlite3_step(stmt);
+//                         if (rc != SQLITE_DONE) {
+//                                 fprintf(stderr, "SQL step error: %s\n",
+//                                         sqlite3_errmsg(db));
+//                                 if (cont_del != NULL) {
+//                                         free(cont_del);
+//                                 }
+//                                 exit(EXIT_FAILURE);
+//                         }
+
+//                         /* free readline memory allocated */
+//                         if (cont_del != NULL) {
+//                                 free(cont_del);
+//                         }
+//                         sqlite3_finalize(stmt);
+//                 } else {
+//                         printf(
+//                             "\nRequest to delete record ID '%d' was abandoned
+//                             "
+//                             "by the user\n\n",
+//                             update_rec_id);
+//                 }
+//         } else if (delete_rec_count > 1) {
+//                 printf(" » ERROR: record ID '%d' search returned '%d' records
+//                 "
+//                        "«\n\n",
+//                        update_rec_id, delete_rec_count);
+//         } else {
+//                 printf(" » WARNING: record ID '%d' found '%d' matching "
+//                        "records «\n\n",
+//                        update_rec_id, delete_rec_count);
+//         }
+
+//         int new_rec_cnt = get_rec_count();
+//         printf("Deleted '%d' record. Total database record count is now"
+//                " %'d (was %'d).\n",
+//                (old_rec_cnt - new_rec_cnt), new_rec_cnt, old_rec_cnt);
+
+//         return delete_rec_count;
+// }

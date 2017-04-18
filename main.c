@@ -70,8 +70,8 @@ int main(int argc, char **argv)
         }
 
         /* delete an acronym record */
-        if (recordid >= 0) {
-                int del_worked = del_acro_rec(recordid);
+        if (del_rec_id >= 0) {
+                int del_worked = del_acro_rec(del_rec_id);
                 if (del_worked) {
                         printf("\nDELETE DONE");
                 }
