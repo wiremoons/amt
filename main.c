@@ -77,6 +77,14 @@ int main(int argc, char **argv)
                 }
         }
 
+        /* update an acronym record */
+        if (update_rec_id >= 0) {
+                int update_worked = update_acro_rec(update_rec_id);
+                if (update_worked) {
+                        printf("\nUPDATE DONE");
+                }
+        }
+
         return (EXIT_SUCCESS);
 }
 
@@ -128,5 +136,6 @@ void show_help(void)
                "  -h        Help   : show this help information\n"
                "  -n        New    : add a new acronym record to the database\n"
                "  -s ?      Search : find an acronym where ? == acronym to "
+               "  -u ?      Update : update an acronym where ? == ID of record "
                "search for\n");
 }

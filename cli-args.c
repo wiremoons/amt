@@ -18,7 +18,7 @@ void get_cli_args(int argc, char **argv)
         opterr = 0;
         int c = 0;
 
-        while ((c = getopt(argc, argv, "d:hns:")) != -1) {
+        while ((c = getopt(argc, argv, "d:hns:u:")) != -1) {
                 switch (c) {
                 case 'd':
                         if (!optarg || !isdigit(*optarg)) {
@@ -48,6 +48,20 @@ void get_cli_args(int argc, char **argv)
                                         "an acronym to search for\n");
                                 exit(EXIT_FAILURE);
                         }
+                        break;
+                case 'u':
+                        if (!optarg || !isdigit(*optarg)) {
+                                fprintf(stderr,
+                                        "\nERROR: for -u option please provide "
+                                        "an acronym ID for update.\nUse "
+                                        "search function to "
+                                        "locate correct record 'ID' first, as "
+                                        "the provided "
+                                        "argument '%s' is not valid.\n",
+                                        optarg ? optarg : "");
+                                exit(EXIT_FAILURE);
+                        }
+                        update_rec_id = atoi(optarg);
                         break;
                 case ':':
                         fprintf(

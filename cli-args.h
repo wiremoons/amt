@@ -10,6 +10,7 @@ extern int newrec;
 extern int help;
 extern char appversion[];
 extern int del_rec_id;
+extern int update_rec_id;
 
 /*
  *   FUNCTION DECLARATIONS FOR cli-args.c

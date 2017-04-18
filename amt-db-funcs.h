@@ -25,7 +25,6 @@ int new_acronym(void);            /* add a new record entry to the database */
 void get_acro_src(void);          /* get a list of acronym sources */
 int del_acro_rec(int del_rec_id); /* delete a acronym record */
 bool check_db_access(void); /* database file exists and can be accessed? */
-// int update_acro_rec(int update_rec_id); /* update a record entry in the
-// database */
+int update_acro_rec(int update_rec_id); /* update a record in the database */
 
 #endif // AMT_DB_FUNCS_H_
