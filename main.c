@@ -131,11 +131,9 @@ void show_help(void)
                "Help Summary:\n"
                "The following command line switches can be used:\n"
                "\n"
-               "  -d ?      Delete : remove an acronym where ? == ID of record "
-               "to delete\n"
-               "  -h        Help   : show this help information\n"
-               "  -n        New    : add a new acronym record to the database\n"
-               "  -s ?      Search : find an acronym where ? == acronym to "
-               "  -u ?      Update : update an acronym where ? == ID of record "
-               "search for\n");
+               "  -d ?  Delete : remove an acronym where ? == ID of record to delete\n"
+               "  -h    Help   : show this help information\n"
+               "  -n    New    : add a new acronym record to the database\n"
+               "  -s ?  Search : find an acronym where ? == acronym to locate\n"
+               "  -u ?  Update : update an acronym where ? == ID of record to update\n");
 }
