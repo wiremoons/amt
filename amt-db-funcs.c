@@ -553,10 +553,8 @@ int update_acro_rec(int update_rec_id)
 	printf("\nSearching for record ID: '%d' in database...\n\n",
 	       update_rec_id);
 
-	rc = sqlite3_prepare_v2(db,
-				"select rowid, Acronym, Definition, Description, "
-				"Source from ACRONYMS where rowid like ?;", -1,
-				&stmt, NULL);
+	/* ifnull() is used to replace any database NULL fields with an empty string as NULL was causing issues with readline when saving a NULL value to add_history() */
+	rc = sqlite3_prepare_v2(db,"select rowid, ifnull(Acronym,''), ifnull(Definition,''), ifnull(Description,''), ifnull(Source,'') from ACRONYMS where rowid is ?;", -1,&stmt, NULL);
 
 	if (rc != SQLITE_OK) {
 		fprintf(stderr, "SQL prepare error: %s\n", sqlite3_errmsg(db));
@@ -592,65 +590,176 @@ int update_acro_rec(int update_rec_id)
 
 	sqlite3_finalize(stmt);
 
+	/* if we found a record to update */
 	if (update_rec_count == 1) {
 		char *cont_del = NULL;
 		cont_del = readline("\nUpdate above record? [ y/n ] : ");
 		if (strcasecmp((const char *)cont_del, "y") == 0) {
 
-			rc = sqlite3_prepare_v2(db,
-						"delete from ACRONYMS where "
-						"rowid = ?;", -1, &stmt, NULL);
-			if (rc != SQLITE_OK) {
-				fprintf(stderr, "SQL prepare error: %s\n",
-					sqlite3_errmsg(db));
-				if (cont_del != NULL) {
-					free(cont_del);
+			char *complete = NULL;
+			char *u_acro = NULL;
+			char *u_acro_expd = NULL;
+			char *u_acro_desc = NULL;
+			char *u_acro_src = NULL;
+
+			printf("\nUse ↑ or ↓ keys to select previous entries text for re-editing or just type in new:\n\n");
+
+			while (1) {
+				u_acro = readline("Enter the acronym: ");
+				add_history(u_acro);
+				u_acro_expd = readline("Enter the expanded acronym: ");
+				add_history(u_acro_expd);
+				u_acro_desc = readline("Enter the acronym description: \n\n");
+				add_history(u_acro_desc);
+				get_acro_src();
+				u_acro_src = readline("\nEnter the acronym source: ");
+				add_history(u_acro_src);
+
+				printf("\nConfirm entry for:\n\n");
+				printf("ACRONYM:     '%s' is: %s.\n", u_acro,
+				       u_acro_expd);
+				printf("DESCRIPTION: %s\n", u_acro_desc);
+				printf("SOURCE:      %s\n\n", u_acro_src);
+
+				complete = readline("Enter record? [ y/n or q ] : ");
+				if (strcasecmp((const char *)complete, "y") == 0) {
+					break;
 				}
+				if (strcasecmp((const char *)complete, "q") == 0) {
+					/* Clean up readline allocated memory */
+					if (complete != NULL) {
+						free(complete);
+					}
+					if (u_acro != NULL) {
+						free(u_acro);
+					}
+					if (u_acro_expd != NULL) {
+						free(u_acro_expd);
+					}
+					if (u_acro_desc != NULL) {
+						free(u_acro_desc);
+					}
+					if (u_acro_src != NULL) {
+						free(u_acro_src);
+					}
+					rl_clear_history();
+					exit(EXIT_FAILURE);
+				}
+			}
+
+			char *sql_update = NULL;
+
+			/* build SQLite 'UPDATE' query */
+			sql_update = sqlite3_mprintf("update ACRONYMS set Acronym=%Q, Definition=%Q, Description=%Q, Source=%Q where rowid is ?;",
+						  u_acro, u_acro_expd, u_acro_desc, u_acro_src);
+
+			rc = sqlite3_prepare_v2(db, sql_update, -1, &stmt, NULL);
+			if (rc != SQLITE_OK) {
+				fprintf(stderr, "SQL prepare error: %s\n", sqlite3_errmsg(db));
+				/* Clean up readline allocated memory */
+				if (complete != NULL) {
+					free(complete);
+				}
+				if (u_acro != NULL) {
+					free(u_acro);
+				}
+				if (u_acro_expd != NULL) {
+					free(u_acro_expd);
+				}
+				if (u_acro_desc != NULL) {
+					free(u_acro_desc);
+				}
+				if (u_acro_src != NULL) {
+					free(u_acro_src);
+				}
+				rl_clear_history();
 				exit(EXIT_FAILURE);
 			}
 
+			/* bind in the record id to UPDATE */
 			rc = sqlite3_bind_int(stmt, 1, update_rec_id);
 			if (rc != SQLITE_OK) {
-				fprintf(stderr, "SQL bind error: %s\n",
-					sqlite3_errmsg(db));
-				if (cont_del != NULL) {
-					free(cont_del);
-				}
+				fprintf(stderr, "SQL bind error: %s\n", sqlite3_errmsg(db));
 				exit(EXIT_FAILURE);
 			}
 
-			rc = sqlite3_step(stmt);
-			if (rc != SQLITE_DONE) {
-				fprintf(stderr, "SQL step error: %s\n",
-					sqlite3_errmsg(db));
-				if (cont_del != NULL) {
-					free(cont_del);
+			/* reset update_rec_count so can re-use here */
+			update_rec_count = 0;
+
+			/* perform the actual database update */
+			while (sqlite3_step(stmt) == SQLITE_ROW) {
+				/* should not run here as 'sqlite3_step(stmt)' should immediately return with SQLITE_DONE only for an UPDATE */
+				update_rec_count++;
+			}
+
+			if (rc != SQLITE_OK) {
+				fprintf(stderr, "SQL exec error: %s\n",	sqlite3_errmsg(db));
+				/* Clean up readline allocated memory */
+				if (complete != NULL) {
+					free(complete);
 				}
+				if (u_acro != NULL) {
+					free(u_acro);
+				}
+				if (u_acro_expd != NULL) {
+					free(u_acro_expd);
+				}
+				if (u_acro_desc != NULL) {
+					free(u_acro_desc);
+				}
+				if (u_acro_src != NULL) {
+					free(u_acro_src);
+				}
+				rl_clear_history();
 				exit(EXIT_FAILURE);
 			}
 
-			/* free readline memory allocated */
-			if (cont_del != NULL) {
-				free(cont_del);
+
+			/* capture number of Sqlite database changes made in last transaction - should be one */
+			int db_changes = sqlite3_changes(db);
+
+			/* check for how many records were updated - should only be one! */
+			if (update_rec_count > 0) {
+				printf("\n\nWARNING: Database changes made was: '%d' but record changes made by sqlite3_step() were: '%d'\n",db_changes,update_rec_count);
+				printf("Only record id: '%d' should of been changed - but '%d' changes were made unexpectedly.\n\n",update_rec_id,update_rec_count);
+			} else {
+				/* no update issues found - so set count to actual database change count */
+				update_rec_count = db_changes;
 			}
+			
+
 			sqlite3_finalize(stmt);
-		} else {
+
+			/* free up any allocated memory by sqlite3 */
+			if (sql_update != NULL) {
+				sqlite3_free(sql_update);
+			}
+
+			/* Clean up readline allocated memory */
+			if (complete != NULL) {
+				free(complete);
+			}
+			if (u_acro != NULL) {
+				free(u_acro);
+			}
+			if (u_acro_expd != NULL) {
+				free(u_acro_expd);
+			}
+			if (u_acro_desc != NULL) {
+				free(u_acro_desc);
+			}
+			if (u_acro_src != NULL) {
+				free(u_acro_src);
+			}
+			rl_clear_history();
+
+			int new_rec_cnt = get_rec_count();
 			printf
-			    ("\nRequest to update record ID '%d' was abandoned "
-			     "by the user\n\n", update_rec_id);
+			    ("Updated '%d' record. Total database record count "
+			     "is now" " %'d (was %'d).\n",
+			     update_rec_count, new_rec_cnt,
+			     old_rec_cnt);
 		}
-	} else if (update_rec_count > 1) {
-		printf(" » ERROR: record ID '%d' search returned '%d' records "
-		       "«\n\n", update_rec_id, update_rec_count);
-	} else {
-		printf(" » WARNING: record ID '%d' found '%d' matching "
-		       "records «\n\n", update_rec_id, update_rec_count);
 	}
-
-	int new_rec_cnt = get_rec_count();
-	printf("Deleted '%d' record. Total database record count is now"
-	       " %'d (was %'d).\n",
-	       (old_rec_cnt - new_rec_cnt), new_rec_cnt, old_rec_cnt);
-
 	return update_rec_count;
 }
