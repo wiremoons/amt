@@ -21,6 +21,7 @@ _testmain.go
 
 # compiled versions
 amt
+amt-arm
 *.exe
 
 # test and profiles
