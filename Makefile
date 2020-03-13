@@ -2,7 +2,7 @@
 #	Makefile for Go Language code
 #
 SRC=amt.go screenio.go sqlitedb.go
-OUTNAME=amt
+OUTNAME=bin/amt
 # Go compiler settings
 CC=go
 CFLAGS=build
