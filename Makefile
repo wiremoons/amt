@@ -25,17 +25,14 @@ MAC64=GOOS=darwin GOARCH=amd64
 # To build FreeBSD 64 bit version:
 FREE64=GOOS=freebsd GOARCH=amd64
 
-$(OUTNAME): $(SRC)
-	$(LIN64) $(CC) $(CFLAGS) -o $(OUTNAME) $(SRC)
-
 arm32: $(SRC)
 	$(ARM32) $(CC) $(CFLAGS) -o $(OUTNAME)-arm $(SRC)
 
 lin32: $(SRC)
-	$(LIN32) $(CC) $(CFLAGS) -o $(OUTNAME)-x386 $(SRC)
+	$(LIN32) $(CC) $(CFLAGS) -o $(OUTNAME)-lin-x386 $(SRC)
 
 lin64: $(SRC)
-	$(LIN64) $(CC) $(CFLAGS) -o $(OUTNAME) $(SRC)
+	$(LIN64) $(CC) $(CFLAGS) -o $(OUTNAME)-lin-x64 $(SRC)
 
 win32: $(SRC)
 	$(WIN32) $(CC) $(CFLAGS) -o $(OUTNAME)-x386.exe $(SRC)
@@ -56,6 +53,6 @@ run: $(SRC)
 	$(CC) $(RFLAGS) $(SRC)
 
 clean:
-	rm $(OUTNAME).exe $(OUTNAME)-x64.exe $(OUTNAME)-x386.exe $(OUTNAME) $(OUTNAME)-x386 $(OUTNAME)-macx64 $(OUTNAME)-mac386 $(OUTNAME)-freebsd64 $(OUTNAME)-arm
+	rm $(OUTNAME)-arm $(OUTNAME)-lin-x386 $(OUTNAME)-lin-x64 $(OUTNAME)-x64.exe  $(OUTNAME)-x386.exe $(OUTNAME)-macx64 $(OUTNAME)-mac386 $(OUTNAME)-freebsd64
 
 all: arm32 lin32 lin64 win32 win64 mac32 mac64 free64
