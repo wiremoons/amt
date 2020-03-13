@@ -35,3 +35,6 @@ tags
 # exclude Vim temp files
 *.swp
 *.swo
+
+# exclude the binary build sub directory
+bin/
