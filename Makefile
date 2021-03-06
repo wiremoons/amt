@@ -10,6 +10,8 @@ RFLAGS=run
 #
 # To build for Linux 32bit ARM7
 ARM32=GOOS=linux GOARCH=arm
+# To build for Linux 64bit ARM64
+ARM64=GOOS=linux GOARCH=arm64
 # To build for Linux 32bit
 LIN32=GOOS=linux GOARCH=386
 # To build for Linux 64bit
@@ -26,7 +28,10 @@ MAC64=GOOS=darwin GOARCH=amd64
 FREE64=GOOS=freebsd GOARCH=amd64
 
 arm32: $(SRC)
-	$(ARM32) $(CC) $(CFLAGS) -o $(OUTNAME)-arm $(SRC)
+	$(ARM32) $(CC) $(CFLAGS) -o $(OUTNAME)-arm32 $(SRC)
+
+arm64: $(SRC)
+	$(ARM64) $(CC) $(CFLAGS) -o $(OUTNAME)-arm64 $(SRC)
 
 lin32: $(SRC)
 	$(LIN32) $(CC) $(CFLAGS) -o $(OUTNAME)-lin-x386 $(SRC)
@@ -53,6 +58,6 @@ run: $(SRC)
 	$(CC) $(RFLAGS) $(SRC)
 
 clean:
-	rm $(OUTNAME)-arm $(OUTNAME)-lin-x386 $(OUTNAME)-lin-x64 $(OUTNAME)-x64.exe  $(OUTNAME)-x386.exe $(OUTNAME)-macx64 $(OUTNAME)-mac386 $(OUTNAME)-freebsd64
+	rm $(OUTNAME)-arm32 $(OUTNAME)-arm64 $(OUTNAME)-lin-x386 $(OUTNAME)-lin-x64 $(OUTNAME)-x64.exe  $(OUTNAME)-x386.exe $(OUTNAME)-macx64 $(OUTNAME)-mac386 $(OUTNAME)-freebsd64
 
-all: arm32 lin32 lin64 win32 win64 mac32 mac64 free64
+all: arm32 arm64 lin32 lin64 win32 win64 mac32 mac64 free64
