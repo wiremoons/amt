@@ -3,7 +3,7 @@
 // author:	Simon Rowe <simon@wiremoons.com>
 // license: open-source released under The MIT License (MIT).
 //
-// Package used to manipulate the SQlite database for application 'amt'
+// Package used to manipulate the SQLite database for application 'amt'
 //
 // Example record of 'ACRONYMS' table in SQLite database for
 // reference:
@@ -139,10 +139,9 @@ func checkDB() (err error) {
 // entered.
 //
 // The openDB function returns an error and error message to explain
-// the problem encountered, or 'nil' if no errors occured. The
-// function returns no oter information as the handle to the database
+// the problem encountered, or 'nil' if no errors occurred. The
+// function returns no other information as the handle to the database
 // is a global variable.
-//
 func openDB() (err error) {
 
 	if debugSwitch {
@@ -170,12 +169,12 @@ func openDB() (err error) {
 	}
 	fmt.Println("Database connection status:  √")
 
-	// display the SQLite database version we are comppiled with
+	// display the SQLite database version we are compiled with
 	fmt.Printf("SQLite3 Database Version:  %s\n", sqlVersion())
 	// obtain and display the current record count into global var for future use
 	recCount = checkCount()
 	fmt.Printf("Current record count is:  %s\n", humanize.Comma(recCount))
-	// display last acronym entered in the database for info
+	// display last acronym entered into the database for info
 	fmt.Printf("Last acronym entered was:  '%s'\n", lastAcronym())
 	// all ok - return no errors
 	return nil
@@ -187,10 +186,9 @@ func openDB() (err error) {
 // entered.
 //
 // The openDB function returns an error and error message to explain
-// the problem encountered, or 'nil' if no errors occured. The
-// function returns no oter information as the handle to the database
+// the problem encountered, or 'nil' if no errors occurred. The
+// function returns no other information as the handle to the database
 // is a global variable.
-//
 func popNewDB() (err error) {
 
 	if debugSwitch {
@@ -218,12 +216,12 @@ func popNewDB() (err error) {
 	}
 	fmt.Println("Database connection status:  √")
 
-	// display the SQLite database version we are comppiled with
+	// display the SQLite database version we are compiled with
 	fmt.Printf("SQLite3 Database Version:  %s\n", sqlVersion())
 	// obtain and display the current record count into global var for future use
 	recCount = checkCount()
 	fmt.Printf("Current record count is:  %s\n", humanize.Comma(recCount))
-	// display last acronym entered in the database for info
+	// display last acronym entered into the database for info
 	fmt.Printf("Last acronym entered was:  '%s'\n", lastAcronym())
 	// all ok - return no errors
 	return nil
@@ -261,7 +259,7 @@ func checkCount() int64 {
 //
 // SQL statement run is:
 //
-//    SELECT Acronym FROM acronyms Order by rowid DESC LIMIT 1;
+//	SELECT Acronym FROM acronyms Order by rowid DESC LIMIT 1;
 func lastAcronym() string {
 
 	if debugSwitch {
@@ -288,7 +286,7 @@ func lastAcronym() string {
 // sqlVersion function returns a string with a version number obtained
 // by running the SQLite3 statement:
 //
-//     SELECT SQLITE_VERSION();
+//	SELECT SQLITE_VERSION();
 func sqlVersion() string {
 
 	if debugSwitch {
@@ -328,12 +326,14 @@ func getSources() string {
 	}
 	defer rows.Close()
 
-	var srcname string
+	var source string
 
 	for rows.Next() {
-		err = rows.Scan(&srcname)
-		sourceList = append(sourceList, srcname)
-		//fmt.Printf("Source: %s\n", srcname)
+		err = rows.Scan(&source)
+		sourceList = append(sourceList, source)
+		if debugSwitch {
+			log.Printf("DEBUG: Source extracted: %s\n", source)
+		}
 	}
 
 	fmt.Printf("\nExisting %d acronym 'source' choices:\n\n", len(sourceList))
@@ -346,27 +346,27 @@ func getSources() string {
 	idxFinal, err := strconv.Atoi(idxChoice)
 	// error - could not convert to Int so just return the string as is...
 	if err != nil {
-		return string(idxChoice)
+		return idxChoice
 	}
-	// check the number entered is not greater or less than is should be..
+	// check the number entered is not greater or less than it should be
 	if (idxFinal > (len(sourceList) - 1)) || (idxFinal < 0) {
 		// error - entered value is out of range warn user and exit
-		log.Fatalf("\n\nFATAL ERROR: The source # you entered '%d' is greater than choices of '0' to '%d' offered, or less than zero\n\n", idxFinal, (len(sourceList) - 1))
+		log.Fatalf("\n\nFATAL ERROR: The source # you entered '%d' is greater than choices of '0' to '%d' offered, or less than zero\n\n", idxFinal, len(sourceList)-1)
 	}
 	// return the result
-	return string(sourceList[idxFinal])
+	return sourceList[idxFinal]
 }
 
 // addRecord function adds a new record to the acronym table held in
 // the SQLite database It does not take any parameters. It does not
 // return any information, and exits the program on completion. The
-// applcation will exit of there is an error attempting to insert the
+// application will exit of there is an error attempting to insert the
 // new record into the database.
 //
 // The SQL insert statement used is:
 //
-//    insert into ACRONYMS(Acronym, Definition, Description, Source)
-//    values(?,?,?,?)
+//	insert into ACRONYMS(Acronym, Definition, Description, Source)
+//	values(?,?,?,?)
 func addRecord() {
 
 	if debugSwitch {
@@ -402,7 +402,7 @@ func addRecord() {
 		// inform user of difference in database record counts -
 		// should be 1
 		fmt.Printf("SUCCESS: %d record added to the database\n",
-			(newInsertCount - preInsertCount))
+			newInsertCount-preInsertCount)
 		// inform user of database record counts
 		fmt.Printf("\nDatabase record count is: %s  [was: %s]\n",
 			humanize.Comma(newInsertCount), humanize.Comma(preInsertCount))
@@ -415,18 +415,18 @@ func addRecord() {
 // searchRecord function obtains a string from the users and search
 // for it in the SQLite acronyms database. It does not take any
 // parameters. It does not return any information, and exits the
-// program on completion. The applcation will exit of there is an
+// program on completion. The application will exit of there is an
 // error.
 //
 // The SQL select statement used is:
 //
-//    select rowid,Acronym,Definition,Description,Source from ACRONYMS where
-//    Acronym like ? ORDER BY Source;
+//	select rowid,Acronym,Definition,Description,Source from ACRONYMS where
+//	Acronym like ? ORDER BY Source;
 func searchRecord() {
 	// start search for an acronym - update user's screen
 	fmt.Printf("\n\nSEARCH FOR AN ACRONYM RECORD\n¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯\n")
 	//
-	// check we have a term to search for in the acronyms database:
+	// check we have a term to search for in the acronyms database
 	if debugSwitch {
 		log.Printf("DEBUG: checking for a search term ... ")
 	}
@@ -439,7 +439,7 @@ func searchRecord() {
 		searchTerm, humanize.Comma(recCount))
 
 	// flush any output to the screen
-	os.Stdout.Sync()
+	_ = os.Stdout.Sync()
 
 	// run a SQL query to find any matching acronyms to that provided
 	// by the user
@@ -487,13 +487,13 @@ func searchRecord() {
 // 'rmid'. The 'rowid' is provided to the function when called as a
 // string value named 'rmid'.
 //
-// The RemoveRecord function returns either 'nil' as a err value ot
-// type error, or detials of any actual error that occurs when it
+// The RemoveRecord function returns either 'nil' as an err value or
+// type error, or details of any actual error that occurs when it
 // runs.
 //
 // The SQL delete statement used is:
 //
-//    delete from ACRONYMS where rowid = ?;
+//	delete from ACRONYMS where rowid = ?;
 func RemoveRecord(rmid string) (err error) {
 	// start remove for an acronym - update user's screen
 	fmt.Printf("\n\nREMOVE AN ACRONYM RECORD\n¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯\n")
@@ -512,12 +512,11 @@ func RemoveRecord(rmid string) (err error) {
 		return err
 	}
 
-	// validate the rowid is valid integer number as used by
-	// SQLite 'rowid' for a table
+	// validate the rowid is an integer
 	if _, err := strconv.ParseInt(rmid, 10, 64); err != nil {
 		fmt.Printf("\nERROR: acronym ID '%v' is not a valid number.\n", rmid)
 		fmt.Printf("Please provide a acronym 'ID' number for the record you want to delete from the database.\n")
-		err = errors.New("Unable to find integer in acronym ID value: '%s'. Error returned: '%v'.")
+		err = errors.New("unable to find integer in acronym ID value: '%s'. Error returned: '%v'")
 		return err
 	}
 
@@ -526,7 +525,7 @@ func RemoveRecord(rmid string) (err error) {
 	fmt.Printf("\nSearching for Acronym ID:  '%s'  across %s records - please wait...\n",
 		rmid, humanize.Comma(recCount))
 	// flush any output to the screen
-	os.Stdout.Sync()
+	_ = os.Stdout.Sync()
 
 	// run a SQL query to find the matching acronym to the 'rowid'
 	// provided by the user - should return a single row result or and
@@ -549,7 +548,7 @@ func RemoveRecord(rmid string) (err error) {
 		fmt.Printf("\nRecord match found:\n\n")
 		fmt.Printf("ID: %s\nACRONYM: '%s' is: %s.\nDESCRIPTION: %s\nSOURCE: %s\n\n",
 			string(rowid), string(acronym), string(definition), string(description), string(source))
-		fmt.Printf("\nRemove record ID '%s' for acronym: '%s'.    ", string(rmid), string(acronym))
+		fmt.Printf("\nRemove record ID '%s' for acronym: '%s'.    ", rmid, string(acronym))
 	}
 
 	// Check with the user that the record shown above is the one they
@@ -574,7 +573,7 @@ func RemoveRecord(rmid string) (err error) {
 	// inform user of difference in database record counts -
 	// should be 1
 	fmt.Printf("SUCCESS: %d record removed to the database\n",
-		(preInsertCount - newInsertCount))
+		preInsertCount-newInsertCount)
 	// inform user of database record counts
 	fmt.Printf("\nDatabase record count is: %s  [was: %s]\n",
 		humanize.Comma(newInsertCount), humanize.Comma(preInsertCount))

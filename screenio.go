@@ -29,7 +29,7 @@ func getInput(question string) string {
 	reader := bufio.NewReader(os.Stdin)
 	// ask the user the question passed to the function
 	fmt.Printf("%s", question)
-	// read the users response - terminating their input on newline
+	// read the user's response - terminating their input on newline
 	response, _ := reader.ReadString('\n')
 	if debugSwitch {
 		fmt.Printf("\nDEBUG: user provided input: '%s' \n", response)
@@ -46,7 +46,7 @@ func getInput(question string) string {
 		fmt.Printf("\nDEBUG: user provided input (after TrimSuffix): '%s' \n", response)
 	}
 	// flush any output to the screen
-	os.Stdout.Sync()
+	_ = os.Stdout.Sync()
 	// return the string read from the user to the calling function
 	return response
 }
@@ -55,9 +55,9 @@ func getInput(question string) string {
 // with the currently running part of the application.
 //
 // checkContinue function reads input from the users console to see if
-// they provide a a 'y' or 'n' response.
+// they provide a 'y' or 'n' response.
 //
-// The function returns a bool depending on the users response.
+// The function returns a bool depending on the user's response.
 // If the response contains the letter 'y' it returns 'true'. Any other
 // response will return 'false'.
 func checkContinue() bool {
@@ -65,7 +65,7 @@ func checkContinue() bool {
 	reader := bufio.NewReader(os.Stdin)
 	// ask the user if they wish to continue
 	fmt.Print("Continue? [y/n]: ")
-	// read the users response - terminating their input on newline
+	// read the user's response - terminating their input on newline
 	response, _ := reader.ReadString('\n')
 	// convert the response to lower case - easier to compare
 	response = strings.ToLower(response)
@@ -88,13 +88,12 @@ func printBanner() {
 // versionInfo function collects details of the program being run and
 // displays it on stdout
 func versionInfo() {
-
-	// define a template for display on screen with place holders for data
+	// define a template for display on screen with placeholders for data
 	const appInfoTmpl = `
 Running '{{.appname}}' version {{.appversion}}
 
- - Built with Go Complier '{{.compiler}}' on Golang version '{{.version}}'
- - Author's web site: http://www.wiremoons.com/
+ - Built with Go Compiler '{{.compiler}}' on Golang version '{{.version}}'
+ - Author's web site: https://www.wiremoons.com/
  - Source code for {{.appname}}: https://github.com/wiremoons/amt-go/
 
 `
@@ -109,17 +108,16 @@ Running '{{.appname}}' version {{.appversion}}
 	// check and build the template so the data field values are added
 	// and the final output is displayed. Check for any error, and
 	// abort if one is found.
-	t := template.Must(template.New("appinf").Parse(appInfoTmpl))
+	t := template.Must(template.New("appInfo").Parse(appInfoTmpl))
 	if err := t.Execute(os.Stdout, data); err != nil {
 		log.Fatalf("FATAL ERROR: in function 'versionInfo()' when building template with err: %v", err)
 	}
 }
 
 // myUsage function replaces the standard flag.Usage() function from Go. The
-// function takes no paramaters, but outputs the command line flags
+// function takes no parameters, but outputs the command line flags
 // that can be used when running the program.
 func myUsage() {
-
 	usageText := `
 Usage of ./amt:
 
@@ -132,8 +130,7 @@ Usage of ./amt:
         -s <acronym>       provide acronym to search for                      optional
         -r <acronym id>    provide acronym id to remove                       optional
         -v                 display program version                            false
-        -w                 search for any similar matches                     false
-`
+        -w                 search for any similar matches                     false`
 	fmt.Println(usageText)
 
 }

@@ -151,11 +151,10 @@ func main() {
 	if recCount == 0 {
 		fmt.Println("\nWould you like to add some initial records to your empty acronyms database?")
 		if checkContinue() {
-
 			err = popNewDB()
 			if err != nil {
 				// records could not be added - exit application
-				log.Fatal("ERROR: aborting program with error: %v\n", err)
+				log.Fatalf("ERROR: aborting program with error: %v\n", err)
 			}
 		}
 	}
