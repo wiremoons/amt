@@ -43,10 +43,10 @@ import (
 // The checkDB function returns an error if it fails to find a valid
 // database file or one that can not be opened successfully. If the
 // function fails for any reason the function returns with information
-// sumarising the error encountered.
+// summarising the error encountered.
 //
 // If successful the checkDB function sets the global variable
-// 'dbname' to the valid path and file name of the SQlite database to
+// 'dbname' to the valid path and file name of the SQLite database to
 // be used.
 func checkDB() (err error) {
 	// check if user has specified the location of the database using
@@ -71,14 +71,14 @@ func checkDB() (err error) {
 				log.Println("DEBUG: Environment variable $ACRODB is:", os.Getenv("ACRODB"))
 			}
 
-			// final attempt to find a useable database - so look in
-			// the same diretcory as the program executable for a file
+			// final attempt to find a usable database - so look in
+			// the same directory as the program executable for a file
 			// called: amt-db.db
 
-			dbName = filepath.Join(filepath.Dir(os.Args[0]), "amt-db.db")
+			dbName = filepath.Join(filepath.Dir(os.Args[0]), "acronyms.db")
 
 			if debugSwitch {
-				log.Printf("DEBUG: Looking for 'amt-db.db' in same location as executable: '%s'\n", filepath.Dir(os.Args[0]))
+				log.Printf("DEBUG: Looking for 'acronyms.db' in same location as executable: '%s'\n", filepath.Dir(os.Args[0]))
 			}
 
 			// quick check to see if file exists - full check will be done below if it gets that far...
