@@ -28,7 +28,7 @@ searched for in the following locations, and in the order given below:
 If you would like to keep your database in a specific location on your
 computer, then the best approach is to store it in you preferred
 location, and then put the full path and database file name in an
-environment variable called: *ARCOBD*.
+environment variable called: *ACRODB*.
 
 Examples of how to set this environment variable for different
 operating systems are shown below.
@@ -80,7 +80,7 @@ Last acronym entered was:  'SNI'
 Running 'amt' version 0.5.5
 
  - Built with Go Complier 'gc' on Golang version 'go1.7.1'
- - Author's web site: http://www.wiremoons.com/
+ - Author's web site: https://www.wiremoons.com/
  - Source code for amt: https://github.com/wiremoons/amt/
 
 
@@ -159,10 +159,10 @@ All is well
 
 A list of future improvements and possible development enhancements are:
 
-- *Create new database* - if run and the user does not have a database, then offer to create one and populate it with a few example acronyms to get them started
-- *Alternative to debubSwitch* - the debug is managed via a command line flag `-d`. The code is full of `if debugSwitch {}` call that maybe better moved to a Go test instead to check if that area of code works as expected?
+- *Create new database* - when the program runs, and the user does **not** have a database, then offer to create one and populate it with a few example acronyms to get them started
+- *Alternative to debugSwitch* - the debug is managed via a command line flag `-d`. The code is full of `if debugSwitch {}` call that maybe better moved to a Go test instead to check if that area of code works as expected?
 
-If you have ideas for improvement they can be suggested via the GitHub issues facilty for this project. Just mark your submitted issue as a *TODO* or *SUGGESTION*.
+If you have ideas for improvement they can be suggested via the GitHub issues facility for this project. Just mark your submitted issue as a *TODO* or *SUGGESTION*.
 
 
 ## License
