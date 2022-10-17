@@ -22,6 +22,7 @@ _testmain.go
 # compiled versions
 amt
 amt-arm
+amt-go
 *.exe
 
 # exclude any SQLite database files
