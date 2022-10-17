@@ -20,7 +20,7 @@ import (
 // SET GLOBAL VARIABLES
 
 // set the version of the app here prep var to hold app name
-var appversion = "0.5.7"
+var appversion = "0.5.8"
 var appname string
 
 // flag() variables used for command line args
@@ -43,7 +43,7 @@ var err error
 var db *sql.DB
 
 // init() always runs before the applications main() function and is
-// used here to set-up the flag() variables from the command line
+// used here to set up the flag() variables from the command line
 // parameters - which are provided by the user when they run the app.
 func init() {
 	// flag types available are: IntVar; StringVar; BoolVar
@@ -113,18 +113,16 @@ func main() {
 		// no database found - offer to create one
 		fmt.Printf("\nCreate a new database and add a few example acronyms?")
 		if !checkContinue() {
-			// no datbase available - exit application
+			// no database available - exit application
 			log.Fatal("ERROR: unable to continue without a valid acronym database.\n")
 		}
-		// user wants a new database - so attempt to create one in the
-		// same directory as the program executable using the file
-		// name: 'amt-db.db' - set location here then attempt to open
-		// it
+		// user wants a new database - so attempt to create it in the same directory as the
+		// program executable using the file named: 'amt-db.db' - set location here then attempt to open it
 		dbName = filepath.Join(filepath.Dir(os.Args[0]), "amt-db.db")
 
 	}
 
-	// open the database and retrive initial data - then print to
+	// open the database and retrieve initial data - then print to
 	// screen for users benefit
 	if debugSwitch {
 		log.Println("DEBUG: Calling 'openDB()'")
@@ -148,7 +146,7 @@ func main() {
 		panic(err.Error())
 	}
 
-	// attempt to populate the datbase with some example records if it
+	// attempt to populate the database with some example records if it
 	// is empty - ask user first
 	if recCount == 0 {
 		fmt.Println("\nWould you like to add some initial records to your empty acronyms database?")

@@ -95,7 +95,7 @@ Running '{{.appname}}' version {{.appversion}}
 
  - Built with Go Complier '{{.compiler}}' on Golang version '{{.version}}'
  - Author's web site: http://www.wiremoons.com/
- - Source code for {{.appname}}: https://github.com/wiremoons/amt/
+ - Source code for {{.appname}}: https://github.com/wiremoons/amt-go/
 
 `
 	// build a map with keys set to match the template names used
