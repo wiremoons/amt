@@ -89,7 +89,7 @@ func main() {
 	}()
 
 	// override Go standard flag.Usage() function to get better
-	// formating and output by using my own function instead
+	// formatting and output by using my own function instead
 	flag.Usage = func() {
 		if debugSwitch {
 			log.Println("DEBUG: Running flag.Usage override function")
@@ -135,7 +135,12 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
+	defer func(db *sql.DB) {
+		err := db.Close()
+		if err != nil {
+			log.Println("ERROR: unable to close the database.")
+		}
+	}(db)
 
 	// check the connection to database is ok
 	err = db.Ping()
