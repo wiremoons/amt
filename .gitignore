@@ -24,6 +24,9 @@ amt
 amt-arm
 *.exe
 
+# exclude any SQLite database files
+*.db
+
 # test and profiles
 *.test
 *.prof
