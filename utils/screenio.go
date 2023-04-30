@@ -5,7 +5,7 @@
 //
 // Package used to display output for application 'amt'
 
-package main
+package utils
 
 import (
 	"bufio"
@@ -21,8 +21,8 @@ import (
 // answer. The question is provided to the function as a string
 // 'question' and the users response is returned by the function as a
 // string 'response'.
-func getInput(question string) string {
-	if debugSwitch {
+func GetInput(question string) string {
+	if DebugSwitch {
 		fmt.Println("\nDEBUG: in function 'getInput' ...")
 	}
 	// create a new reader and attached to stdin
@@ -31,7 +31,7 @@ func getInput(question string) string {
 	fmt.Printf("%s", question)
 	// read the user's response - terminating their input on newline
 	response, _ := reader.ReadString('\n')
-	if debugSwitch {
+	if DebugSwitch {
 		fmt.Printf("\nDEBUG: user provided input: '%s' \n", response)
 	}
 	// remove the trailing newline (Unix/Mac) or both the newline and
@@ -42,7 +42,7 @@ func getInput(question string) string {
 	// is returned unchanged - so no harm done!
 	response = strings.TrimSuffix(response, "\n")
 	response = strings.TrimSuffix(response, "\r")
-	if debugSwitch {
+	if DebugSwitch {
 		fmt.Printf("\nDEBUG: user provided input (after TrimSuffix): '%s' \n", response)
 	}
 	// flush any output to the screen
@@ -60,7 +60,7 @@ func getInput(question string) string {
 // The function returns a bool depending on the user's response.
 // If the response contains the letter 'y' it returns 'true'. Any other
 // response will return 'false'.
-func checkContinue() bool {
+func CheckContinue() bool {
 	// create a new reader from stdin
 	reader := bufio.NewReader(os.Stdin)
 	// ask the user if they wish to continue
@@ -80,14 +80,14 @@ func checkContinue() bool {
 
 // printBanner function is used to print out a small program banner
 // which displays the application name.
-func printBanner() {
+func PrintBanner() {
 	fmt.Println("\n\t\t\tAcronym Management Tool 'amt'")
 	fmt.Println("\t\t\t¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯¯")
 }
 
 // versionInfo function collects details of the program being run and
 // displays it on stdout
-func versionInfo() {
+func VersionInfo() {
 	// define a template for display on screen with placeholders for data
 	const appInfoTmpl = `
 Running '{{.appname}}' version {{.appversion}}
@@ -100,8 +100,8 @@ Running '{{.appname}}' version {{.appversion}}
 	// build a map with keys set to match the template names used
 	// and the data fields to be used in the template as values
 	data := map[string]interface{}{
-		"appname":    appname,
-		"appversion": appversion,
+		"appname":    Appname,
+		"appversion": Appversion,
 		"compiler":   runtime.Compiler,
 		"version":    runtime.Version(),
 	}
@@ -117,7 +117,7 @@ Running '{{.appname}}' version {{.appversion}}
 // myUsage function replaces the standard flag.Usage() function from Go. The
 // function takes no parameters, but outputs the command line flags
 // that can be used when running the program.
-func myUsage() {
+func MyUsage() {
 	usageText := `
 Usage of ./amt:
 
