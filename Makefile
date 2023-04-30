@@ -1,17 +1,17 @@
 #
 #	Makefile for Go Language code
 #
-SRC=amt.go screenio.go sqlitedb.go
+SRC=main.go 
 OUTNAME=bin/amt
 # Go compiler settings
 CC=go
-CFLAGS=build
+CFLAGS=build -gcflags=all=-dwarf=false -ldflags=-w -trimpath
 RFLAGS=run
 #
 # To build for Linux 32bit ARM7
-ARM32=GOOS=linux GOARCH=arm
+AARCH32=GOOS=linux GOARCH=arm
 # To build for Linux 64bit ARM64
-ARM64=GOOS=linux GOARCH=arm64
+AARCH64=GOOS=linux GOARCH=arm64
 # To build for Linux 32bit
 LIN32=GOOS=linux GOARCH=386
 # To build for Linux 64bit
@@ -20,44 +20,39 @@ LIN64=GOOS=linux GOARCH=amd64
 WIN32=GOOS=windows GOARCH=386
 # To build Windows 64 bit version:
 WIN64=GOOS=windows GOARCH=amd64
-# To build Mac OS X 32 bit version:
-MAC32=GOOS=darwin GOARCH=386
-# To build Mac OS X 64 bit version:
+# To build Windows amr64 bit version:
+WINARM64=GOOS=windows GOARCH=arm64
+# To build macOS 64 bit version:
 MAC64=GOOS=darwin GOARCH=amd64
+# To build macOS M1 or M2 arm64 version:
+MACARM64=GOOS=darwin GOARCH=arm64
 # To build FreeBSD 64 bit version:
 FREE64=GOOS=freebsd GOARCH=amd64
 
-arm32: $(SRC)
-	$(ARM32) $(CC) $(CFLAGS) -o $(OUTNAME)-arm32 $(SRC)
-
-arm64: $(SRC)
-	$(ARM64) $(CC) $(CFLAGS) -o $(OUTNAME)-arm64 $(SRC)
-
+aarch32: $(SRC)
+	$(AARCH32) $(CC) $(CFLAGS) -o $(OUTNAME)-aarch32
+aarch64: $(SRC)
+	$(AARCH64) $(CC) $(CFLAGS) -o $(OUTNAME)-aarch64
 lin32: $(SRC)
-	$(LIN32) $(CC) $(CFLAGS) -o $(OUTNAME)-lin-x386 $(SRC)
-
+	$(LIN32) $(CC) $(CFLAGS) -o $(OUTNAME)-linux-x86
 lin64: $(SRC)
-	$(LIN64) $(CC) $(CFLAGS) -o $(OUTNAME)-lin-x64 $(SRC)
-
+	$(LIN64) $(CC) $(CFLAGS) -o $(OUTNAME)-linux-x64
 win32: $(SRC)
-	$(WIN32) $(CC) $(CFLAGS) -o $(OUTNAME)-x386.exe $(SRC)
-
+	$(WIN32) $(CC) $(CFLAGS) -o $(OUTNAME)-windows-x86.exe
 win64: $(SRC)
-	$(WIN64) $(CC) $(CFLAGS) -o $(OUTNAME)-x64.exe $(SRC)
-
-mac32: $(SRC)
-	$(MAC32) $(CC) $(CFLAGS) -o $(OUTNAME)-mac386 $(SRC)
-
+	$(WIN64) $(CC) $(CFLAGS) -o $(OUTNAME)-windows-x64.exe
+winarm64: $(SRC)
+	$(WINARM64) $(CC) $(CFLAGS) -o $(OUTNAME)-windows-arm64.exe
 mac64: $(SRC)
-	$(MAC64) $(CC) $(CFLAGS) -o $(OUTNAME)-macx64 $(SRC)
-
+	$(MAC64) $(CC) $(CFLAGS) -o $(OUTNAME)-mac-x64
+macarm64: $(SRC)
+	$(MACARM64) $(CC) $(CFLAGS) -o $(OUTNAME)-mac-arm64
 free64: $(SRC)
-	$(FREE64) $(CC) $(CFLAGS) -o $(OUTNAME)-freebsd64 $(SRC)
-
+	$(FREE64) $(CC) $(CFLAGS) -o $(OUTNAME)-freebsd64
 run: $(SRC)
 	$(CC) $(RFLAGS) $(SRC)
 
 clean:
-	rm $(OUTNAME)-arm32 $(OUTNAME)-arm64 $(OUTNAME)-lin-x386 $(OUTNAME)-lin-x64 $(OUTNAME)-x64.exe  $(OUTNAME)-x386.exe $(OUTNAME)-macx64 $(OUTNAME)-mac386 $(OUTNAME)-freebsd64
+	rm $(OUTNAME)-aarch32 $(OUTNAME)-aarch64 $(OUTNAME)-linux-x86 $(OUTNAME)-linux-x64 $(OUTNAME)-windows-x64.exe $(OUTNAME)-windows-x86.exe $(OUTNAME)-windows-arm64.exe $(OUTNAME)-mac-x64 $(OUTNAME)-freebsd64 $(OUTNAME)-mac-arm64
 
-all: arm32 arm64 lin32 lin64 win32 win64 mac32 mac64 free64
+all: aarch32 aarch64 lin32 lin64 win32 win64 winarm64 mac64 free64 macarm64
