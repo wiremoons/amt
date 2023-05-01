@@ -62,7 +62,7 @@ func init() {
 // main is the application start up function for amt
 func main() {
 
-	// inject needs global variables into out sub-package 'utils'
+	// inject needed global variables into out sub-package 'utils'
 	utils.DebugSwitch = DebugSwitch
 	utils.DbName = DbName
 	utils.Appversion = Appversion
@@ -125,6 +125,9 @@ func main() {
 		DbName = filepath.Join(filepath.Dir(os.Args[0]), "amt-db.db")
 	}
 	// Setup and open the database ready for use
+	if DebugSwitch {
+		log.Println("DEBUG: database found - attempting to open with 'OpenDataBase()'")
+	}
 	err = utils.OpenDataBase()
 	if err != nil {
 		log.Println(err)
