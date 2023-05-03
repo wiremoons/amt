@@ -5,7 +5,7 @@ SRC=main.go
 OUTNAME=bin/amt
 # Go compiler settings
 CC=go
-CFLAGS=build -gcflags=all=-dwarf=false -ldflags=-w -trimpath
+CFLAGS=build -gcflags=all=-dwarf=false -ldflags="-s -w" -trimpath
 RFLAGS=run
 #
 # To build for Linux 32bit ARM7
