@@ -13,13 +13,13 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/wiremoons/amt-go/utils"
+	"amt-go/lib"
 )
 
 // SET GLOBAL VARIABLES
 
 // set the version of the app here prep var to hold app name
-var Appversion = "0.5.9"
+var Appversion = "0.6.0"
 var Appname string
 
 // flag() variables used for command line args
@@ -63,11 +63,11 @@ func init() {
 func main() {
 
 	// inject needed global variables into out sub-package 'utils'
-	utils.DebugSwitch = DebugSwitch
-	utils.DbName = DbName
-	utils.Appversion = Appversion
-	utils.Appname = Appname
-	utils.RecCount = RecCount
+	lib.DebugSwitch = DebugSwitch
+	lib.DbName = DbName
+	lib.Appversion = Appversion
+	lib.Appname = Appname
+	lib.RecCount = RecCount
 
 	// confirm if debug mode is enabled and display other command line
 	// flags and their current status
@@ -97,26 +97,26 @@ func main() {
 		if DebugSwitch {
 			log.Println("DEBUG: Running flag.Usage override function")
 		}
-		utils.MyUsage()
+		lib.MyUsage()
 	}
 
 	// print out start up banner
 	if DebugSwitch {
 		log.Println("DEBUG: Calling 'printBanner()'")
 	}
-	utils.PrintBanner()
+	lib.PrintBanner()
 
 	// check if a valid database file is available on the system
 	if DebugSwitch {
 		log.Println("DEBUG: Calling 'checkDB()'")
 	}
 
-	err = utils.CheckDB()
+	err = lib.CheckDB()
 	if err != nil {
 		log.Println(err)
 		// no database found - offer to create one
 		fmt.Printf("\nCreate a new database and add a few example acronyms?")
-		if !utils.CheckContinue() {
+		if !lib.CheckContinue() {
 			// no database available - exit application
 			log.Fatal("ERROR: unable to continue without a valid acronym database.\n")
 		}
@@ -128,17 +128,17 @@ func main() {
 	if DebugSwitch {
 		log.Println("DEBUG: database found - attempting to open with 'OpenDataBase()'")
 	}
-	err = utils.OpenDataBase()
+	err = lib.OpenDataBase()
 	if err != nil {
 		log.Println(err)
 	}
 
 	// attempt to populate the database with some example records if it
 	// is empty - ask user first
-	if (utils.CheckCount()) == 0 {
+	if (lib.CheckCount()) == 0 {
 		fmt.Println("\nWould you like to add some initial records to your empty acronyms database?")
-		if utils.CheckContinue() {
-			err = utils.PopNewDB()
+		if lib.CheckContinue() {
+			err = lib.PopNewDB()
 			if err != nil {
 				// records could not be added - exit application
 				log.Fatalf("ERROR: aborting program with error: %v\n", err)
@@ -162,31 +162,31 @@ func main() {
 		if DebugSwitch {
 			log.Println("DEBUG: 'showVer' switch statement called")
 		}
-		utils.VersionInfo()
+		lib.VersionInfo()
 
 	case addNew:
 		if DebugSwitch {
 			log.Println("DEBUG: 'addNew' switch statement called")
 		}
-		utils.AddRecord()
+		lib.AddRecord()
 
 	case len(searchTerm) > 0:
 		if DebugSwitch {
 			log.Println("DEBUG: search switch statement called")
 		}
-		utils.SearchRecord(searchTerm)
+		lib.SearchRecord(searchTerm)
 
 	case len(rmid) > 0:
 		if DebugSwitch {
 			log.Println("DEBUG: remove switch statement called")
 		}
-		_ = utils.RemoveRecord(rmid)
+		_ = lib.RemoveRecord(rmid)
 
 	default:
 		if DebugSwitch {
 			log.Println("DEBUG: Default switch statement called")
 		}
-		utils.VersionInfo()
+		lib.VersionInfo()
 		flag.Usage()
 	}
 

@@ -1,4 +1,4 @@
-module github.com/wiremoons/amt-go
+module amt-go
 
 go 1.16
 
