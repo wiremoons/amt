@@ -1,8 +1,13 @@
 #
 #	Makefile for Go Language code
 #
+## +++ DEFAULT MAKE OUTPUT +++ :
+## Set default 'make' rule to run if no argument is given
+.PHONY: default
+default: all ;
+
 SRC=main.go 
-OUTNAME=bin/amt
+OUTNAME=bin/passgen
 # Go compiler settings
 CC=go
 CFLAGS=build -gcflags=all=-dwarf=false -ldflags="-s -w" -trimpath
@@ -56,3 +61,20 @@ clean:
 	rm $(OUTNAME)-aarch32 $(OUTNAME)-aarch64 $(OUTNAME)-linux-x86 $(OUTNAME)-linux-x64 $(OUTNAME)-windows-x64.exe $(OUTNAME)-windows-x86.exe $(OUTNAME)-windows-arm64.exe $(OUTNAME)-mac-x64 $(OUTNAME)-freebsd64 $(OUTNAME)-mac-arm64
 
 all: aarch32 aarch64 lin32 lin64 win32 win64 winarm64 mac64 free64 macarm64
+
+help:
+	@echo ""
+	@echo "The following make command are available:"
+	@echo ""
+	@echo "  all     : build binaries for all platforms"
+	@echo "  <name>  : build one of the following binary names (ie 'make win64'):"
+	@echo "              Windows :  win32 / win64 / winarm64"
+	@echo "              Linux   :  lin32 / lin64 / aarch32 / aarch64"
+	@echo "              macOS   :  mac64 / macarm64"
+	@echo "              FreeBSD :  free64"
+	@echo "  clean   : delete previous build binaries"
+	@echo "  help    : displays this help message"
+	@echo ""
+	@echo "NB: default action is 'all'"
+	@echo "    built binaries are located in the sub directory: ./bin"
+	@echo "" 
