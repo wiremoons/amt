@@ -7,7 +7,7 @@
 default: all ;
 
 SRC=main.go 
-OUTNAME=bin/passgen
+OUTNAME=bin/amt
 # Go compiler settings
 CC=go
 CFLAGS=build -gcflags=all=-dwarf=false -ldflags="-s -w" -trimpath
