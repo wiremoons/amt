@@ -51,10 +51,10 @@ func GetInput(question string) string {
 	return response
 }
 
-// checkContinue function asks the user if they would like to continue
+// CheckContinue function asks the user if they would like to continue
 // with the currently running part of the application.
 //
-// checkContinue function reads input from the users console to see if
+// CheckContinue function reads input from the users console to see if
 // they provide a 'y' or 'n' response.
 //
 // The function returns a bool depending on the user's response.
@@ -69,13 +69,8 @@ func CheckContinue() bool {
 	response, _ := reader.ReadString('\n')
 	// convert the response to lower case - easier to compare
 	response = strings.ToLower(response)
-	// see if the user input contains 'y'
-	if strings.Contains(response, "y") {
-		// done here - so return
-		return true
-	}
-	// if above failed - so return false
-	return false
+	// see if the user input contains 'y' : returns 'true' or 'false'
+	return strings.Contains(response, "y")
 }
 
 // printBanner function is used to print out a small program banner

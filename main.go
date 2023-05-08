@@ -191,6 +191,4 @@ func main() {
 	}
 
 	// PROGRAM END
-	return
-
 }
